@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ArcPay</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+  <style>
+    :root {
+      --bg:       #020810;
+      --bg2:      #050d18;
+      --bg3:      #081220;
+      --bg4:      #0b1828;
+      --border:   #0f2238;
+      --blue:     #3b82f6;
+      --blue2:    #1d4ed8;
+      --blue-dim: #0f2444;
+      --glow:     rgba(59,130,246,0.15);
+      --text:     #ddeeff;
+      --muted:    #3d5a7a;
+      --green:    #10b981;
+      --yellow:   #f59e0b;
+      --red:      #ef4444;
+      --sidebar-w: 260px;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    html,body{height:100%;overflow:hidden;}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);display:flex;}
+
+    /* ══ SIDEBAR ══ */
+    #sidebar {
+      width: var(--sidebar-w);
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      position: fixed;
+      left: 0; top: 0;
+      z-index: 50;
+      transition: transform .3s ease;
+    }
+    #sidebar.hidden { transform: translateX(-100%); }
+
+    .sidebar-logo {
+      padding: 24px 20px 16px;
+      font-size: 22px; font-weight: 800;
+      color: var(--blue); letter-spacing: .5px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-logo span { color: #fff; }
+    .sidebar-logo .tagline { font-size: 11px; color: var(--muted); font-weight: 400; margin-top: 3px; }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 14px; border-radius: 10px;
+      cursor: pointer; transition: all .15s;
+      color: var(--muted); font-size: 14px; font-weight: 500;
+      border: 1px solid transparent;
+    }
+    .nav-item:hover { background: var(--bg3); color: var(--text); }
+    .nav-item.active {
+      background: var(--blue-dim); color: var(--blue);
+      border-color: rgba(59,130,246,.2);
+    }
+    .nav-item .icon { font-size: 18px; width: 24px; text-align: center; }
+
+    .nav-section-label {
+      font-size: 10px; color: var(--muted); text-transform: uppercase;
+      letter-spacing: .8px; padding: 12px 14px 4px; font-weight: 600;
+    }
+
+    .sidebar-wallet {
+      padding: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .sw-connected {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 12px; padding: 12px 14px;
+    }
+    .sw-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; }
+    .sw-addr  { font-size: 12px; color: var(--blue); margin: 4px 0 8px; word-break: break-all; line-height: 1.4; }
+    .sw-net   { font-size: 11px; color: var(--muted); margin-bottom: 10px; }
+    .sw-actions { display: flex; gap: 6px; }
+    .sw-btn {
+      flex: 1; padding: 7px; border-radius: 7px; border: none;
+      cursor: pointer; font-size: 12px; font-weight: 600; transition: opacity .15s;
+    }
+    .sw-btn:hover { opacity: .82; }
+    .sw-copy { background: var(--blue-dim); color: var(--blue); }
+    .sw-disc { background: #1c0606; color: #f87171; }
+
+    .connect-sidebar-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--blue), var(--blue2));
+      border: none; color: #fff; padding: 11px;
+      border-radius: 10px; cursor: pointer;
+      font-size: 14px; font-weight: 600; transition: all .15s;
+    }
+    .connect-sidebar-btn:hover { opacity: .87; box-shadow: 0 0 20px var(--glow); }
+
+    /* ══ MAIN ══ */
+    #main {
+      margin-left: var(--sidebar-w);
+      flex: 1; height: 100vh;
+      overflow-y: auto;
+      display: flex; flex-direction: column;
+    }
+
+    /* ══ TOPBAR ══ */
+    #topbar {
+      position: sticky; top: 0; z-index: 40;
+      background: rgba(2,8,16,.95);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px; height: 56px;
+      display: flex; align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(12px);
+    }
+    .topbar-title { font-size: 16px; font-weight: 700; color: var(--text); }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+    .topbar-badge {
+      background: var(--blue-dim); color: var(--blue);
+      font-size: 11px; font-weight: 600;
+      padding: 4px 10px; border-radius: 20px;
+      border: 1px solid rgba(59,130,246,.2);
+    }
+    .hamburger {
+      display: none; background: none; border: none;
+      color: var(--text); font-size: 22px; cursor: pointer;
+    }
+
+    /* ══ CONTENT ══ */
+    #content { padding: 24px; max-width: 900px; width: 100%; }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ══ BALANCE HERO ══ */
+    .balance-hero {
+      background: linear-gradient(135deg, #030f1e, #071a30);
+      border: 1px solid #0d2a44;
+      border-radius: 20px; padding: 28px;
+      margin-bottom: 18px;
+      position: relative; overflow: hidden;
+    }
+    .balance-hero::before {
+      content: '';
+      position: absolute; top: -40px; right: -40px;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(59,130,246,.12), transparent 70%);
+      pointer-events: none;
+    }
+    .bh-label { font-size: 10px; font-weight:700; color: var(--blue); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+    .bh-row   { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; }
+    .bh-ticker{ font-size: 15px; font-weight: 700; color: var(--blue); background: rgba(59,130,246,.15); padding: 3px 8px; border-radius: 6px; }
+    .bh-amount{ font-size: 44px; font-weight: 800; color: var(--text); line-height: 1.1; }
+    .bh-fiat  { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+    .bh-address { font-size: 11px; color: var(--muted); margin-bottom: 16px; word-break: break-all; }
+    /* token row */
+    .section-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+    .token-row   { display: flex; align-items: center; gap: 12px; }
+    .token-icon  { width: 40px; height: 40px; border-radius: 50%; background: var(--blue); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; flex-shrink: 0; }
+    .token-info  { flex: 1; }
+    .token-name  { font-size: 14px; font-weight: 600; }
+    .token-sub   { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .token-right { text-align: right; }
+    .token-amount{ font-size: 16px; font-weight: 700; }
+    .token-usd   { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    /* txn rows */
+    .txn-row { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--border); }
+    .txn-row:last-child { border-bottom: none; }
+    .txn-icon { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+    .txn-icon.in  { background: rgba(16,185,129,.12); color: var(--green); }
+    .txn-icon.out { background: rgba(59,130,246,.12);  color: var(--blue); }
+    .txn-icon.ct  { background: rgba(245,158,11,.12);  color: var(--yellow); }
+    .txn-info   { flex: 1; }
+    .txn-type   { font-size: 13px; font-weight: 600; }
+    .txn-hash   { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .txn-amount { font-size: 14px; font-weight: 700; text-align: right; }
+    .txn-time   { font-size: 11px; color: var(--muted); text-align: right; margin-top: 2px; }
+
+    .bh-actions { display: flex; gap: 10px; margin-top: 20px; }
+    .bh-btn {
+      padding: 10px 20px; border-radius: 10px; border: none;
+      cursor: pointer; font-size: 13px; font-weight: 600; transition: all .15s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .bh-btn-primary {
+      background: linear-gradient(135deg, var(--blue), var(--blue2));
+      color: #fff;
+    }
+    .bh-btn-primary:hover { opacity: .87; box-shadow: 0 0 20px var(--glow); }
+    .bh-btn-secondary {
+      background: var(--bg4); color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .bh-btn-secondary:hover { border-color: var(--blue); }
+
+    /* ══ STATS GRID ══ */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: 12px; margin-bottom: 14px;
+    }
+    .stat-box {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 14px; padding: 16px;
+      transition: all .2s;
+    }
+    .stat-box:hover { border-color: #1a3d6e; }
+    .stat-box .s-lbl  { font-size: 10px; font-weight:700; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; }
+    .stat-box .s-val  { font-size: 26px; font-weight: 700; color: var(--text); margin: 6px 0 3px; }
+    .stat-box .s-val.green { color: var(--green); }
+    .stat-box .s-val.blue  { color: var(--blue); }
+    .stat-box .s-sub  { font-size: 11px; color: var(--muted); }
+
+    /* ══ QUOTE ══ */
+    .quote-strip {
+      background: linear-gradient(135deg, #030b18, #071525);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--blue);
+      border-radius: 12px; padding: 14px 18px;
+      margin-bottom: 18px; position: relative; overflow: hidden;
+    }
+    .quote-strip::before {
+      content: '"'; position: absolute; right: 14px; top: -8px;
+      font-size: 72px; color: rgba(59,130,246,.06);
+      font-family: Georgia,serif; line-height: 1;
+    }
+    .qt-text { font-size: 13px; color: #6ba8f0; font-style: italic; line-height: 1.6; transition: opacity .4s; }
+    .qt-sub  { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+    /* ══ RECENT TXS ══ */
+    .tx-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 0; border-bottom: 1px solid var(--border);
+    }
+    .tx-row:last-child { border-bottom: none; }
+    .tx-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+    .tx-icon.sent     { background: #100a02; }
+    .tx-icon.received { background: #021008; }
+    .tx-info { flex: 1; }
+    .tx-desc  { font-size: 13px; font-weight: 600; }
+    .tx-addr  { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .tx-amount { font-size: 14px; font-weight: 700; }
+    .tx-amount.sent     { color: var(--yellow); }
+    .tx-amount.received { color: var(--green); }
+
+    /* ══ CARDS ══ */
+    .card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 15px; padding: 20px; margin-bottom: 16px;
+    }
+    .card h2 {
+      font-size: 15px; color: var(--blue); margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    /* ══ FORM ══ */
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%; background: var(--bg4);
+      border: 1px solid var(--border); border-radius: 9px;
+      padding: 10px 13px; color: var(--text); font-size: 13px;
+      outline: none; transition: border .15s, box-shadow .15s; font-family: inherit;
+    }
+    .form-group input:focus,.form-group textarea:focus,.form-group select:focus {
+      border-color: var(--blue); box-shadow: 0 0 0 3px rgba(59,130,246,.1);
+    }
+    .form-group input.input-error { border-color: var(--red)!important; }
+    .form-group input.input-ok    { border-color: var(--green)!important; }
+    .form-group select option { background: var(--bg3); }
+    .field-hint { font-size: 12px; margin-top: 4px; padding: 5px 10px; border-radius: 6px; display: none; }
+    .hint-error { background: #100202; color: #fca5a5; display: block; }
+    .hint-ok    { background: #021008; color: #6ee7b7; display: block; }
+    .submit-btn {
+      width: 100%; background: linear-gradient(135deg, var(--blue), var(--blue2));
+      border: none; color: #fff; padding: 12px; border-radius: 9px;
+      cursor: pointer; font-size: 14px; font-weight: 600; margin-top: 5px; transition: all .15s;
+    }
+    .submit-btn:hover    { opacity: .87; box-shadow: 0 0 20px var(--glow); }
+    .submit-btn:disabled { opacity: .4; cursor: not-allowed; box-shadow: none; }
+
+    /* ══ INVOICE ══ */
+    .invoice-card {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 12px; padding: 15px; margin-bottom: 9px; transition: all .15s;
+    }
+    .invoice-card:hover { border-color: #152d52; box-shadow: 0 0 20px rgba(59,130,246,.05); }
+    .invoice-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 9px; }
+    .inv-id     { font-size: 11px; color: var(--muted); }
+    .inv-desc   { font-size: 14px; font-weight: 600; margin: 3px 0; }
+    .inv-amount { font-size: 19px; color: var(--blue); font-weight: 700; }
+    .inv-countdown { font-size: 11px; margin-top: 4px; padding: 2px 7px; border-radius: 4px; display: inline-block; }
+    .countdown-ok      { background: #021008; color: var(--green); }
+    .countdown-warning { background: #100a02; color: var(--yellow); }
+    .countdown-overdue { background: #100202; color: var(--red); }
+    .status-badge { padding: 4px 11px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+    .status-pending   { background: #100a02; color: var(--yellow); border: 1px solid #3d2c08; }
+    .status-paid      { background: #021008; color: var(--green);  border: 1px solid #083d1a; }
+    .status-cancelled { background: #100202; color: var(--red);    border: 1px solid #380a0a; }
+    .invoice-actions { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 9px; }
+    .action-btn {
+      padding: 5px 13px; border-radius: 7px; border: none;
+      cursor: pointer; font-size: 12px; font-weight: 600; transition: all .15s;
+    }
+    .action-btn:hover { opacity: .8; }
+    .btn-pay    { background: var(--blue); color: #fff; }
+    .btn-cancel { background: #1c0606; color: #f87171; border: 1px solid #380a0a; }
+    .btn-share  { background: var(--blue-dim); color: var(--blue); }
+
+    /* ══ FILTER ══ */
+    .filter-row { display: flex; gap: 9px; margin-bottom: 13px; flex-wrap: wrap; align-items: center; }
+    .filter-select {
+      background: var(--bg4); border: 1px solid var(--border);
+      border-radius: 8px; padding: 6px 12px;
+      color: var(--text); font-size: 13px; outline: none; cursor: pointer;
+    }
+
+    /* ══ CLIENTS ══ */
+    .client-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 9px 0; border-bottom: 1px solid var(--border);
+    }
+    .client-row:last-child { border-bottom: none; }
+    .client-name { font-size: 13px; font-weight: 600; }
+    .client-addr { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .client-del  { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; }
+    .client-del:hover { color: var(--red); }
+
+    /* ══ PAY LINK ══ */
+    .plink-box {
+      background: var(--bg4); border: 1px solid var(--border);
+      border-radius: 9px; padding: 12px 14px;
+      font-size: 12px; color: var(--blue);
+      word-break: break-all; margin-top: 10px; display: none;
+    }
+
+    /* ══ ANALYTICS ══ */
+    .analytics-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; margin-bottom: 14px; }
+    .analytic-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 15px; }
+    .analytic-card .a-value { font-size: 20px; font-weight: 700; color: var(--blue); }
+    .analytic-card .a-label { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+    /* ══ MODAL ══ */
+    #walletModal {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.85); z-index: 998;
+      align-items: center; justify-content: center;
+      backdrop-filter: blur(6px);
+    }
+    #walletModal.open { display: flex; }
+    .modal-box {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 20px; padding: 26px; width: 355px; max-width: 93vw;
+      box-shadow: 0 0 60px rgba(59,130,246,.1), 0 24px 64px rgba(0,0,0,.7);
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+    .modal-header h3 { color: var(--blue); font-size: 17px; font-weight: 700; }
+    .modal-close { background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; }
+    .modal-close:hover { color: var(--text); }
+    .modal-sub { color: var(--muted); font-size: 12px; margin-bottom: 16px; }
+    .modal-section-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin: 12px 0 7px; }
+    .modal-footer { color: var(--muted); font-size: 11px; text-align: center; margin-top: 14px; }
+    .wallet-option {
+      display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+      border-radius: 12px; border: 1px solid var(--border); margin-bottom: 7px;
+      cursor: pointer; transition: all .18s; background: var(--bg4);
+    }
+    .wallet-option:hover { border-color: var(--blue); background: #0d1e38; box-shadow: 0 0 16px var(--glow); }
+    .wallet-option.recent { border-color: #152d52; }
+    .w-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; overflow: hidden; }
+    .w-icon img { width: 26px; height: 26px; object-fit: contain; }
+    .w-info { flex: 1; }
+    .w-name { font-weight: 600; color: var(--text); font-size: 14px; }
+    .w-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .w-tag { font-size: 11px; font-weight: 600; white-space: nowrap; }
+    .tag-recent    { color: var(--blue); }
+    .tag-installed { color: var(--green); }
+    .tag-soon      { color: var(--muted); opacity:.5; }
+
+    /* ══ NOT CONNECTED ══ */
+    .not-connected { text-align: center; padding: 40px; color: var(--muted); }
+    .not-connected .icon { font-size: 44px; margin-bottom: 12px; }
+
+    /* ══ TX LINK ══ */
+    .tx-link { color: var(--blue); font-size: 12px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; margin-top: 7px; }
+    .tx-link:hover { text-decoration: underline; }
+
+    .glow-line { height: 1px; background: linear-gradient(90deg,transparent,rgba(59,130,246,.3),transparent); margin: 14px 0; }
+
+    /* ══ TOAST ══ */
+    #toast-container { position: fixed; top: 70px; right: 18px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+    .toast { padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 500; min-width: 250px; animation: slideIn .25s ease; box-shadow: 0 4px 24px rgba(0,0,0,.6); }
+    .toast-success { background: #021008; color: var(--green); border: 1px solid #083d1a; }
+    .toast-error   { background: #100202; color: var(--red);   border: 1px solid #3d0808; }
+    .toast-info    { background: #020a18; color: var(--blue);  border: 1px solid #0a2040; }
+    @keyframes slideIn { from{transform:translateX(110%);opacity:0;} to{transform:translateX(0);opacity:1;} }
+
+    /* ══ OVERLAY ══ */
+    #sidebarOverlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.6); z-index: 45;
+    }
+    #sidebarOverlay.show { display: block; }
+
+    /* ══ SCROLLBAR ══ */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: #0f2440; border-radius: 3px; }
+
+    /* ══ RESPONSIVE ══ */
+    @media(max-width:768px) {
+      #sidebar { transform: translateX(-100%); }
+      #sidebar.open { transform: translateX(0); }
+      #main { margin-left: 0; }
+      .hamburger { display: block; }
+      .stats-grid { grid-template-columns: repeat(2,1fr); }
+      .bh-amount { font-size: 36px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+<div id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- ══ WALLET MODAL ══ -->
+<div id="walletModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Connect Wallet</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <p class="modal-sub">Connect to Arc Network Testnet</p>
+
+    <div id="recentSection" style="display:none;">
+      <div class="modal-section-label">Recently Used</div>
+      <div id="recentWallets"></div>
+      <div class="modal-section-label">All Wallets</div>
+    </div>
+
+    <div class="wallet-option" onclick="connectWithWallet('metamask')">
+      <div class="w-icon" style="background:#e8761a;">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" onerror="this.outerHTML='🦊'"/>
+      </div>
+      <div class="w-info"><div class="w-name">MetaMask</div><div class="w-desc">Most popular EVM wallet</div></div>
+      <span class="w-tag" id="mm-tag"></span>
+    </div>
+
+    <div class="wallet-option" onclick="connectWithWallet('rabby')">
+      <div class="w-icon" style="background:#7B3FE4;font-size:20px;">🐰</div>
+      <div class="w-info"><div class="w-name">Rabby Wallet</div><div class="w-desc">Smart security wallet</div></div>
+      <span class="w-tag" id="rabby-tag"></span>
+    </div>
+
+    <div class="wallet-option" onclick="connectWithWallet('okx')">
+      <div class="w-icon" style="background:#000;border:1px solid #222;color:#fff;font-weight:800;font-size:12px;">OK</div>
+      <div class="w-info"><div class="w-name">OKX Wallet</div><div class="w-desc">Multi-chain Web3 wallet</div></div>
+      <span class="w-tag" id="okx-tag"></span>
+    </div>
+
+    <div class="wallet-option" onclick="toast('Coming soon!','info')">
+      <div class="w-icon" style="background:#1a3a8f;font-size:18px;">🔗</div>
+      <div class="w-info"><div class="w-name">WalletConnect</div><div class="w-desc">Mobile & hardware wallets</div></div>
+      <span class="w-tag tag-soon">Soon</span>
+    </div>
+
+    <div class="wallet-option" onclick="toast('Coming soon!','info')">
+      <div class="w-icon" style="background:#0052FF;font-size:18px;">🔵</div>
+      <div class="w-info"><div class="w-name">Coinbase Wallet</div><div class="w-desc">Easy onboarding</div></div>
+      <span class="w-tag tag-soon">Soon</span>
+    </div>
+
+    <p class="modal-footer">By connecting you agree to use ArcPay on Arc Network Testnet</p>
+  </div>
+</div>
+
+<!-- ══ SIDEBAR ══ -->
+<div id="sidebar">
+  <div class="sidebar-logo">
+    Arc<span>Pay</span>
+    <div class="tagline">Trustless billing on Arc Network</div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <div class="nav-item active" onclick="showPage('dashboard',this)">
+      <span class="icon">🏠</span> Dashboard
+    </div>
+    <div class="nav-item" onclick="showPage('create',this)">
+      <span class="icon">📄</span> Create Invoice
+    </div>
+    <div class="nav-item" onclick="showPage('invoices',this)">
+      <span class="icon">📋</span> My Invoices
+    </div>
+
+    <div class="nav-section-label" style="margin-top:8px;">Tools</div>
+    <div class="nav-item" onclick="showPage('clients',this)">
+      <span class="icon">👥</span> Clients
+    </div>
+    <div class="nav-item" onclick="showPage('paylinks',this)">
+      <span class="icon">🔗</span> Pay Links
+    </div>
+    <div class="nav-item" onclick="showPage('analytics',this)">
+      <span class="icon">📊</span> Analytics
+    </div>
+  </nav>
+
+  <!-- Wallet area in sidebar -->
+  <div class="sidebar-wallet">
+    <div id="sw-disconnected">
+      <button class="connect-sidebar-btn" onclick="openModal()">Connect Wallet</button>
+    </div>
+    <div id="sw-connected" style="display:none;">
+      <div class="sw-connected">
+        <div class="sw-label">Connected</div>
+        <div class="sw-addr" id="sw-addr">--</div>
+        <div class="sw-net"  id="sw-net">--</div>
+        <div class="sw-actions">
+          <button class="sw-btn sw-copy" onclick="copyAddress()">📋 Copy</button>
+          <button class="sw-btn sw-disc" onclick="disconnectWallet()">⏻ Disconnect</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MAIN ══ -->
+<div id="main">
+  <div id="topbar">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="hamburger" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-title" id="topbarTitle">Dashboard</div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-badge" id="topbarNet" style="display:none;">Arc Testnet</div>
+      <div class="topbar-badge" id="topbarAddr" style="display:none;">--</div>
+    </div>
+  </div>
+
+  <div id="content">
+
+    <!-- ══ DASHBOARD ══ -->
+    <div class="page active" id="page-dashboard">
+
+      <!-- Not connected -->
+      <div id="not-connected-msg" class="card">
+        <div class="not-connected">
+          <div class="icon">🔗</div>
+          <p style="margin-bottom:16px;">Connect your wallet to get started with ArcPay</p>
+          <button class="submit-btn" style="max-width:200px;margin:0 auto;" onclick="openModal()">Connect Wallet</button>
+        </div>
+      </div>
+
+      <!-- Connected dashboard -->
+      <div id="dashboard-content" style="display:none;">
+
+        <!-- Balance Hero — RemitArc style -->
+        <div class="balance-hero">
+          <div class="bh-label">USDC BALANCE · ARC TESTNET</div>
+          <div class="bh-row">
+            <span class="bh-ticker">USDC</span>
+            <span class="bh-amount" id="balAmount">--</span>
+          </div>
+          <div class="bh-fiat" id="bh-fiat">≈ $-- USD</div>
+          <div class="bh-address" id="bh-address">--</div>
+          <div class="bh-actions">
+            <button class="bh-btn bh-btn-primary"
+              onclick="showPage('create', document.querySelectorAll('.nav-item')[1])">
+              ↑ Create Invoice
+            </button>
+            <button class="bh-btn bh-btn-secondary" onclick="copyAddress()">
+              📋 Receive
+            </button>
+          </div>
+        </div>
+
+        <!-- Your Balance token card -->
+        <div class="card" style="margin-bottom:14px;">
+          <div class="section-label">YOUR BALANCE</div>
+          <div class="token-row">
+            <div class="token-icon">$</div>
+            <div class="token-info">
+              <div class="token-name">USDC</div>
+              <div class="token-sub">USD Coin · Arc Testnet</div>
+            </div>
+            <div class="token-right">
+              <div class="token-amount" id="tokenAmount">--</div>
+              <div class="token-usd" id="tokenUsd">$--</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats grid — 4 boxes like RemitArc -->
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="s-lbl">INVOICES SENT</div>
+            <div class="s-val" id="sentCount">0</div>
+            <div class="s-sub">Total created</div>
+          </div>
+          <div class="stat-box">
+            <div class="s-lbl">INVOICES RECEIVED</div>
+            <div class="s-val" id="receivedCount">0</div>
+            <div class="s-sub">On-chain records</div>
+          </div>
+          <div class="stat-box">
+            <div class="s-lbl">PAID</div>
+            <div class="s-val green" id="paidCount">0</div>
+            <div class="s-sub">Settled invoices</div>
+          </div>
+          <div class="stat-box">
+            <div class="s-lbl">SETTLEMENT</div>
+            <div class="s-val blue">&lt;1s</div>
+            <div class="s-sub">Deterministic</div>
+          </div>
+        </div>
+
+        <!-- Recent Transactions — live from chain -->
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+            <div class="section-label" style="margin-bottom:0;">RECENT TRANSACTIONS</div>
+            <button onclick="loadRecentTxns()" style="background:none;border:none;
+              color:var(--muted);cursor:pointer;font-size:12px;">⟳ Refresh</button>
+          </div>
+          <div id="recentTxns">
+            <p style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0;">
+              No transactions yet
+            </p>
+          </div>
+        </div>
+
+        <!-- Network info -->
+        <div class="card">
+          <div class="section-label">NETWORK</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+            <div>
+              <div style="font-size:14px;font-weight:600;" id="networkName">Arc Network Testnet</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:3px;word-break:break-all;" id="walletAddr">--</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:11px;color:var(--muted);">Chain ID</div>
+              <div style="font-size:14px;color:var(--blue);font-weight:600;">5039234</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ CREATE INVOICE ══ -->
+    <div class="page" id="page-create">
+      <div class="card">
+        <h2>📄 Create Invoice</h2>
+        <div class="form-group">
+          <label>Recipient Wallet Address</label>
+          <input type="text" id="invRecipient" placeholder="0x... (EVM addresses only)"
+            oninput="validateRecipient(this.value)"/>
+          <div class="field-hint" id="recipientHint"></div>
+        </div>
+        <div class="form-group">
+          <label>Amount (USDC)</label>
+          <input type="number" id="invAmount" placeholder="e.g. 10" min="0" step="0.01"/>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="invDesc" rows="3" placeholder="What is this invoice for?"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Due Date</label>
+          <input type="date" id="invDueDate"/>
+        </div>
+        <button class="submit-btn" id="createBtn" onclick="createInvoice()">🚀 Create Invoice on Arc</button>
+        <div id="txResult" style="display:none;margin-top:11px;"></div>
+      </div>
+    </div>
+
+    <!-- ══ MY INVOICES ══ -->
+    <div class="page" id="page-invoices">
+      <div class="card">
+        <h2>📋 My Invoices</h2>
+        <div class="filter-row">
+          <select class="filter-select" id="invoiceFilter" onchange="filterInvoices()">
+            <option value="all">All Invoices</option>
+            <option value="sent">Sent</option>
+            <option value="received">Received</option>
+            <option value="pending">Pending</option>
+            <option value="paid">Paid</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <button class="action-btn btn-share" onclick="loadInvoices()" style="padding:6px 13px;">🔄 Refresh</button>
+        </div>
+        <div id="invoiceList">
+          <p style="color:var(--muted);font-size:13px;">Connect your wallet to view invoices.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CLIENTS ══ -->
+    <div class="page" id="page-clients">
+      <div class="card">
+        <h2>👥 Client Directory</h2>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:15px;">Save frequent client addresses for quick invoicing.</p>
+        <div class="form-group">
+          <label>Client Name</label>
+          <input type="text" id="clientName" placeholder="e.g. Amina Designs"/>
+        </div>
+        <div class="form-group">
+          <label>Wallet Address (EVM)</label>
+          <input type="text" id="clientAddr" placeholder="0x..." oninput="validateClientAddr(this.value)"/>
+          <div class="field-hint" id="clientAddrHint"></div>
+        </div>
+        <div class="form-group">
+          <label>Notes (optional)</label>
+          <input type="text" id="clientNote" placeholder="e.g. Logo design client"/>
+        </div>
+        <button class="submit-btn" onclick="saveClient()" style="margin-top:0;">+ Save Client</button>
+        <div class="glow-line" style="margin-top:18px;"></div>
+        <div id="clientList"><p style="color:var(--muted);font-size:13px;">No clients saved yet.</p></div>
+      </div>
+    </div>
+
+    <!-- ══ PAY LINKS ══ -->
+    <div class="page" id="page-paylinks">
+      <div class="card">
+        <h2>🔗 Payment Links</h2>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:15px;">Generate a shareable link to receive USDC on Arc.</p>
+        <div class="form-group">
+          <label>Your Wallet Address</label>
+          <input type="text" id="plWallet" placeholder="Connect wallet to auto-fill"
+            readonly style="cursor:not-allowed;opacity:.6;"/>
+        </div>
+        <div class="form-group">
+          <label>Amount (USDC) — leave blank for open amount</label>
+          <input type="number" id="plAmount" placeholder="e.g. 25" min="0" step="0.01"/>
+        </div>
+        <div class="form-group">
+          <label>Reference / Note</label>
+          <input type="text" id="plNote" placeholder="e.g. Invoice #007 payment"/>
+        </div>
+        <button class="submit-btn" onclick="generatePayLink()" style="margin-top:0;">⚡ Generate Payment Link</button>
+        <div class="plink-box" id="plinkResult"></div>
+      </div>
+      <div class="card">
+        <h2>📜 Saved Links</h2>
+        <div id="savedLinks"><p style="color:var(--muted);font-size:13px;">No saved links yet.</p></div>
+      </div>
+    </div>
+
+    <!-- ══ ANALYTICS ══ -->
+    <div class="page" id="page-analytics">
+      <div class="card">
+        <h2>📊 Analytics & Reports</h2>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Your invoicing performance on Arc Network.</p>
+        <div class="analytics-grid">
+          <div class="analytic-card"><div class="a-value" id="a-sent">0</div><div class="a-label">Invoices Sent</div></div>
+          <div class="analytic-card"><div class="a-value" id="a-received">0</div><div class="a-label">Invoices Received</div></div>
+          <div class="analytic-card"><div class="a-value" id="a-paid">0</div><div class="a-label">Paid</div></div>
+          <div class="analytic-card"><div class="a-value" id="a-pending">0</div><div class="a-label">Pending</div></div>
+        </div>
+        <div class="analytic-card" style="margin-bottom:12px;">
+          <div class="a-value" id="a-volume">0 USDC</div><div class="a-label">Total Volume Invoiced</div>
+        </div>
+        <button class="submit-btn" style="margin-top:4px;" onclick="refreshAnalytics()">🔄 Refresh Analytics</button>
+      </div>
+      <div class="card">
+        <h2>💡 Tips</h2>
+        <p style="color:var(--muted);font-size:13px;line-height:2;">
+          • Always verify recipient addresses before creating invoices on-chain.<br/>
+          • Use Payment Links for quick one-time payments without a full invoice.<br/>
+          • Save frequent clients to speed up your workflow.<br/>
+          • The speed of light, the security of code — ArcPay.
+        </p>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+// ══ CONFIG ══════════════════════════════════════════════════
+const CONTRACT_ADDRESS = "0xBDF5897181FD10752ABde22b80763227EcB027D5";
+const ARC_CHAIN_ID     = "0x4CEF52"; // 5039234
+const EXPLORER         = "https://explorer.arc.network";
+const RPC_LIST = [
+  "https://arc-testnet.drpc.org",
+  "https://rpc.drpc.testnet.arc.network",
+  "https://5039234.rpc.thirdweb.com"
+];
+
+const CONTRACT_ABI = [
+  "function createInvoice(address,uint256,string,uint256) external returns (uint256)",
+  "function payInvoice(uint256) external",
+  "function cancelInvoice(uint256) external",
+  "function getInvoice(uint256) external view returns (tuple(uint256 id,address creator,address recipient,uint256 amount,string description,uint256 dueDate,uint8 status))",
+  "function getMySentInvoices() external view returns (uint256[])",
+  "function getMyReceivedInvoices() external view returns (uint256[])"
+];
+
+const QUOTES = [
+  "Trustless billing, timeless efficiency.",
+  "The speed of light, the security of code.",
+  "Your invoice, immutable on-chain.",
+  "Payments without borders. Settlement without banks.",
+  "Built on Arc. Powered by trust.",
+  "USDC-native. Latency-free. Yours.",
+];
+
+// ══ STATE ════════════════════════════════════════════════════
+let provider, signer, contract, userAddress;
+let allInvoices = [], connected = false;
+let balanceInterval = null, quoteIdx = 0;
+
+// ══ QUOTES ═══════════════════════════════════════════════════
+const qEl = document.getElementById('quoteText');
+if (qEl) {
+  qEl.style.transition = 'opacity .4s';
+  setInterval(() => {
+    qEl.style.opacity = '0';
+    setTimeout(() => {
+      quoteIdx = (quoteIdx + 1) % QUOTES.length;
+      qEl.textContent = QUOTES[quoteIdx];
+      qEl.style.opacity = '1';
+    }, 420);
+  }, 5000);
+}
+
+// ══ TOAST ════════════════════════════════════════════════════
+function toast(msg, type = 'info') {
+  const el = document.createElement('div');
+  el.className = `toast toast-${type}`;
+  el.textContent = msg;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), 4500);
+}
+
+// ══ SIDEBAR ══════════════════════════════════════════════════
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+}
+
+// ══ NAV ══════════════════════════════════════════════════════
+const PAGE_TITLES = {
+  dashboard: 'Dashboard', create: 'Create Invoice',
+  invoices: 'My Invoices', clients: 'Clients',
+  paylinks: 'Pay Links', analytics: 'Analytics'
+};
+
+function showPage(name, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  if (el) el.classList.add('active');
+  document.getElementById('topbarTitle').textContent = PAGE_TITLES[name] || name;
+  closeSidebar();
+  if (name === 'invoices'  && userAddress) loadInvoices();
+  if (name === 'analytics' && userAddress) refreshAnalytics();
+  if (name === 'dashboard' && userAddress) { refreshBalance(); loadRecentTxns(); }
+}
+
+// ══ MODAL ════════════════════════════════════════════════════
+function openModal() {
+  const has     = !!window.ethereum;
+  const isMM    = has && !!window.ethereum.isMetaMask && !window.ethereum.isRabby;
+  const isRabby = has && !!window.ethereum.isRabby;
+  const isOKX   = !!window.okxwallet;
+
+  const setTag = (id, on) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (on) { el.textContent = '✅ Installed'; el.className = 'w-tag tag-installed'; }
+    else    { el.textContent = '';             el.className = 'w-tag'; }
+  };
+  setTag('mm-tag', isMM); setTag('rabby-tag', isRabby); setTag('okx-tag', isOKX);
+
+  const recent = localStorage.getItem('arcpay_last_wallet');
+  const rsec   = document.getElementById('recentSection');
+  if (recent) {
+    rsec.style.display = 'block';
+    const labels = { metamask:'MetaMask', rabby:'Rabby Wallet', okx:'OKX Wallet' };
+    document.getElementById('recentWallets').innerHTML = `
+      <div class="wallet-option recent" onclick="connectWithWallet('${recent}')">
+        <div class="w-icon" style="background:var(--blue-dim);font-size:15px;">🕐</div>
+        <div class="w-info"><div class="w-name">${labels[recent]||recent}</div><div class="w-desc">Last connected</div></div>
+        <span class="w-tag tag-recent">Recently Used</span>
+      </div>`;
+  } else rsec.style.display = 'none';
+
+  document.getElementById('walletModal').classList.add('open');
+}
+function closeModal() { document.getElementById('walletModal').classList.remove('open'); }
+document.addEventListener('click', e => {
+  if (e.target === document.getElementById('walletModal')) closeModal();
+});
+
+// ══ CONNECT ══════════════════════════════════════════════════
+async function connectWithWallet(type) {
+  const eth = (type === 'okx') ? (window.okxwallet || window.ethereum) : window.ethereum;
+  if (!eth) { toast('Wallet not found — please install it first', 'error'); return; }
+  closeModal();
+
+  try {
+    await eth.request({ method: 'eth_requestAccounts' });
+
+    try {
+      await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: ARC_CHAIN_ID }] });
+    } catch (e) {
+      if (e.code === 4902) {
+        await eth.request({
+          method: 'wallet_addEthereumChain',
+          params: [{
+            chainId: ARC_CHAIN_ID, chainName: 'Arc Network Testnet',
+            nativeCurrency: { name:'USDC', symbol:'USDC', decimals:18 },
+            rpcUrls: RPC_LIST, blockExplorerUrls: [EXPLORER]
+          }]
+        });
+      } else throw e;
+    }
+
+    provider    = new ethers.providers.Web3Provider(eth);
+    signer      = provider.getSigner();
+    userAddress = await signer.getAddress();
+    contract    = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+    connected   = true;
+
+    localStorage.setItem('arcpay_last_wallet', type);
+
+    const network = await provider.getNetwork();
+    const short   = userAddress.slice(0,6) + '...' + userAddress.slice(-4);
+
+    // Update sidebar wallet panel
+    document.getElementById('sw-disconnected').style.display = 'none';
+    document.getElementById('sw-connected').style.display    = 'block';
+    document.getElementById('sw-addr').textContent = userAddress;
+    document.getElementById('sw-net').textContent  = 'Chain ID: ' + network.chainId;
+
+    // Update topbar
+    document.getElementById('topbarAddr').textContent    = short;
+    document.getElementById('topbarAddr').style.display  = 'inline-block';
+    document.getElementById('topbarNet').style.display   = 'inline-block';
+
+    // Update dashboard
+    document.getElementById('not-connected-msg').style.display = 'none';
+    document.getElementById('dashboard-content').style.display = 'block';
+    document.getElementById('bh-address').textContent = userAddress;
+    const netEl = document.getElementById('networkName');
+    if (netEl) netEl.textContent = 'Arc Network Testnet (Chain ID: ' + network.chainId + ')';
+
+    // Pay links wallet
+    const plw = document.getElementById('plWallet');
+    if (plw) plw.value = userAddress;
+
+    setupWalletListeners(eth);
+    await refreshBalance();
+    await loadInvoiceCounts();
+    loadRecentTxns();
+
+    if (balanceInterval) clearInterval(balanceInterval);
+    balanceInterval = setInterval(refreshBalance, 30000);
+
+    toast('Wallet connected!', 'success');
+
+  } catch (err) {
+    if (err.code === 4001) toast('Connection rejected', 'error');
+    else toast('Connection failed: ' + (err.message || err), 'error');
+  }
+}
+
+// ══ DISCONNECT ════════════════════════════════════════════════
+function disconnectWallet() {
+  if (balanceInterval) clearInterval(balanceInterval);
+  connected = false; userAddress = null;
+  provider = signer = contract = null; allInvoices = [];
+
+  document.getElementById('sw-disconnected').style.display = 'block';
+  document.getElementById('sw-connected').style.display    = 'none';
+  document.getElementById('topbarAddr').style.display      = 'none';
+  document.getElementById('topbarNet').style.display       = 'none';
+  document.getElementById('not-connected-msg').style.display = 'block';
+  document.getElementById('dashboard-content').style.display = 'none';
+  document.getElementById('invoiceList').innerHTML =
+    '<p style="color:var(--muted);font-size:13px;">Connect your wallet to view invoices.</p>';
+  document.getElementById('balAmount').textContent    = '--';
+  document.getElementById('sentCount').textContent    = '0';
+  document.getElementById('receivedCount').textContent= '0';
+  const pcEl = document.getElementById('paidCount');
+  if (pcEl) pcEl.textContent = '0';
+  const pendEl = document.getElementById('pendingCount');
+  if (pendEl) pendEl.textContent = '0';
+  const raEl = document.getElementById('recentTxns');
+  if (raEl) raEl.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0;">No transactions yet</p>';
+
+  toast('Wallet disconnected', 'info');
+}
+
+function copyAddress() {
+  if (!userAddress) return;
+  navigator.clipboard.writeText(userAddress);
+  toast('Address copied!', 'success');
+}
+
+// ══ WALLET EVENTS ════════════════════════════════════════════
+function setupWalletListeners(eth) {
+  if (!eth || !eth.on) return;
+  eth.on('accountsChanged', (accounts) => {
+    if (!accounts || accounts.length === 0) { toast('Wallet disconnected from extension', 'info'); disconnectWallet(); }
+    else if (accounts[0].toLowerCase() !== (userAddress||'').toLowerCase()) {
+      toast('Account changed — please reconnect', 'info'); disconnectWallet(); setTimeout(() => openModal(), 600);
+    }
+  });
+  eth.on('disconnect', () => { toast('Wallet disconnected', 'info'); disconnectWallet(); });
+  eth.on('chainChanged', (chainId) => {
+    if (chainId.toLowerCase() !== ARC_CHAIN_ID.toLowerCase()) {
+      toast('Network changed — please switch back to Arc Testnet', 'error'); disconnectWallet();
+    }
+  });
+}
+
+if (window.ethereum) setupWalletListeners(window.ethereum);
+if (window.okxwallet) setupWalletListeners(window.okxwallet);
+
+// ══ BALANCE ══════════════════════════════════════════════════
+async function refreshBalance() {
+  if (!userAddress) return;
+  let fmt = '--';
+
+  try {
+    const bal = await provider.getBalance(userAddress);
+    fmt = parseFloat(ethers.utils.formatEther(bal)).toFixed(4);
+  } catch {}
+
+  if (fmt === '--') {
+    for (const rpc of RPC_LIST) {
+      try {
+        const p   = new ethers.providers.JsonRpcProvider(rpc);
+        const bal = await p.getBalance(userAddress);
+        fmt = parseFloat(ethers.utils.formatEther(bal)).toFixed(4);
+        break;
+      } catch {}
+    }
+  }
+
+  // Update all balance displays
+  const balEl = document.getElementById('balAmount');
+  if (balEl) balEl.textContent = fmt;
+
+  const tokenAmtEl = document.getElementById('tokenAmount');
+  if (tokenAmtEl) tokenAmtEl.textContent = fmt === '--' ? '--' : fmt + ' USDC';
+
+  // USDC ≈ $1 USD
+  const usdVal = fmt === '--' ? '$--' : '$' + parseFloat(fmt).toFixed(2);
+  const fiatEl = document.getElementById('bh-fiat');
+  if (fiatEl) fiatEl.textContent = '≈ ' + usdVal + ' USD';
+  const tusdEl = document.getElementById('tokenUsd');
+  if (tusdEl) tusdEl.textContent = usdVal;
+
+  // Update nav badge if exists
+  const badge = document.getElementById('nav-balance-badge');
+  if (badge) badge.textContent = fmt === '--' ? 'USDC --' : 'USDC ' + fmt;
+}
+
+// ══ RECENT TRANSACTIONS ════════════════════════════════════════
+async function loadRecentTxns() {
+  const container = document.getElementById('recentTxns');
+  if (!container || !userAddress) return;
+  container.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:16px 0;">Loading…</p>';
+
+  // Try to get recent contract events from the blockchain
+  try {
+    const sent     = await contract.getMySentInvoices();
+    const received = await contract.getMyReceivedInvoices();
+    const allIds   = [...new Set([
+      ...sent.map(i => i.toString()),
+      ...received.map(i => i.toString())
+    ])];
+
+    if (!allIds.length) {
+      container.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0;">No transactions yet</p>';
+      return;
+    }
+
+    const rows = [];
+    for (const id of allIds.slice(0, 8)) { // show latest 8
+      try {
+        const inv  = await contract.getInvoice(id);
+        const isSent = inv.creator.toLowerCase() === userAddress.toLowerCase();
+        const amt    = ethers.utils.formatUnits(inv.amount, 6);
+        const status = ['Pending','Paid','Cancelled'][inv.status];
+        const other  = isSent ? inv.recipient : inv.creator;
+        const short  = other.slice(0,6) + '...' + other.slice(-4);
+        const iconCls = status === 'Paid' ? 'in' : isSent ? 'out' : 'ct';
+        const iconChar= status === 'Paid' ? '↓' : isSent ? '↑' : '📄';
+        rows.push(`
+          <div class="txn-row">
+            <div class="txn-icon ${iconCls}">${iconChar}</div>
+            <div class="txn-info">
+              <div class="txn-type">Invoice #${id} — ${isSent ? 'Sent' : 'Received'}</div>
+              <div class="txn-hash">${isSent ? 'To' : 'From'}: ${short}</div>
+            </div>
+            <div>
+              <div class="txn-amount" style="color:${status==='Paid'?'var(--green)':status==='Cancelled'?'var(--red)':'var(--yellow)'}">
+                ${status==='Paid'?'+':''}${amt} USDC
+              </div>
+              <div class="txn-time">${status}</div>
+            </div>
+          </div>`);
+      } catch {}
+    }
+
+    container.innerHTML = rows.length
+      ? rows.join('')
+      : '<p style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0;">No transactions yet</p>';
+
+  } catch (e) {
+    container.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:16px 0;">Could not load transactions</p>';
+  }
+}
+
+// ══ INVOICE COUNTS ════════════════════════════════════════════
+async function loadInvoiceCounts() {
+  if (!contract) return;
+  try {
+    const s = await contract.getMySentInvoices();
+    const r = await contract.getMyReceivedInvoices();
+    document.getElementById('sentCount').textContent     = s.length;
+    document.getElementById('receivedCount').textContent = r.length;
+  } catch {}
+}
+
+// ══ VALIDATE EVM ══════════════════════════════════════════════
+function validateRecipient(val) { return _evm(val, document.getElementById('invRecipient'), document.getElementById('recipientHint')); }
+function validateClientAddr(val){ return _evm(val, document.getElementById('clientAddr'),    document.getElementById('clientAddrHint')); }
+function _evm(val, input, hint) {
+  if (!val) { input.className=''; hint.className='field-hint'; hint.textContent=''; return true; }
+  if (/^0x[0-9a-fA-F]{40}$/.test(val)) {
+    input.className='input-ok'; hint.className='field-hint hint-ok';
+    hint.textContent='✅ Valid EVM address — works on Arc, Ethereum, BNB, Polygon'; return true;
+  }
+  let net='Unknown network';
+  if (/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(val))                          net='Solana';
+  else if (/^(1|3)[a-zA-HJ-NP-Z0-9]{25,34}$/.test(val)||/^bc1/.test(val)) net='Bitcoin';
+  else if (/^T[a-zA-Z0-9]{33}$/.test(val))                                 net='Tron';
+  else if (/^cosmos[a-z0-9]{39}$/.test(val))                               net='Cosmos';
+  else if (/^r[a-zA-HJ-NP-Z0-9]{24,34}$/.test(val))                       net='XRP';
+  input.className='input-error'; hint.className='field-hint hint-error';
+  hint.textContent=`❌ Wrong address — ${net} detected. ArcPay needs an EVM address (0x...)`; return false;
+}
+
+// ══ CREATE INVOICE ════════════════════════════════════════════
+async function createInvoice() {
+  if (!contract) { toast('Connect your wallet first','error'); return; }
+  const recipient = document.getElementById('invRecipient').value.trim();
+  const amount    = document.getElementById('invAmount').value;
+  const desc      = document.getElementById('invDesc').value.trim();
+  const dueDate   = document.getElementById('invDueDate').value;
+  const btn       = document.getElementById('createBtn');
+  const txResult  = document.getElementById('txResult');
+
+  if (!recipient||!amount||!desc||!dueDate) { toast('Please fill all fields','error'); return; }
+  if (!validateRecipient(recipient))         { toast('Recipient must be a valid EVM address','error'); return; }
+
+  try {
+    btn.disabled=true; btn.textContent='⏳ Creating…'; txResult.style.display='none';
+    const amtUnits    = ethers.utils.parseUnits(amount.toString(), 6);
+    const dueDateUnix = Math.floor(new Date(dueDate).getTime()/1000);
+    toast('Sending to Arc Network…','info');
+    const tx      = await contract.createInvoice(recipient, amtUnits, desc, dueDateUnix);
+    toast('Waiting for confirmation…','info');
+    const receipt = await tx.wait();
+    toast('✅ Invoice created on Arc!','success');
+    txResult.style.display='block';
+    txResult.innerHTML=`<a class="tx-link" href="${EXPLORER}/tx/${receipt.transactionHash}" target="_blank">🔗 View on Arc Explorer ↗</a>`;
+    document.getElementById('invRecipient').value='';
+    document.getElementById('invAmount').value='';
+    document.getElementById('invDesc').value='';
+    document.getElementById('invDueDate').value='';
+    document.getElementById('invRecipient').className='';
+    document.getElementById('recipientHint').className='field-hint';
+    await loadInvoiceCounts();
+    await loadDashboardActivity();
+  } catch (err) {
+    toast('Error: '+(err.reason||err.message),'error');
+  } finally {
+    btn.disabled=false; btn.textContent='🚀 Create Invoice on Arc';
+  }
+}
+
+// ══ LOAD INVOICES ════════════════════════════════════════════
+async function loadInvoices() {
+  if (!contract) return;
+  const container = document.getElementById('invoiceList');
+  container.innerHTML='<p style="color:var(--muted);">Loading invoices…</p>';
+
+  let sentIds=[], receivedIds=[];
+  try { sentIds=await contract.getMySentInvoices(); receivedIds=await contract.getMyReceivedInvoices(); }
+  catch {
+    for (const rpc of RPC_LIST) {
+      try {
+        const p=new ethers.providers.JsonRpcProvider(rpc);
+        const c=new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, p);
+        sentIds=await c.getMySentInvoices({from:userAddress});
+        receivedIds=await c.getMyReceivedInvoices({from:userAddress}); break;
+      } catch {}
+    }
+  }
+
+  const allIds=[...new Set([...sentIds.map(i=>i.toString()),...receivedIds.map(i=>i.toString())])];
+  if (!allIds.length) { container.innerHTML='<p style="color:var(--muted);font-size:13px;">No invoices yet. Create your first one!</p>'; return; }
+
+  allInvoices=[];
+  for (const id of allIds) {
+    let inv=null;
+    try { inv=await contract.getInvoice(id); } catch {}
+    if (!inv) { for (const rpc of RPC_LIST) { try { const p=new ethers.providers.JsonRpcProvider(rpc); const c=new ethers.Contract(CONTRACT_ADDRESS,CONTRACT_ABI,p); inv=await c.getInvoice(id); break; } catch {} } }
+    if (!inv) continue;
+    allInvoices.push({
+      id: inv.id.toString(), creator: inv.creator, recipient: inv.recipient,
+      amount: ethers.utils.formatUnits(inv.amount,6), description: inv.description,
+      dueDate: inv.dueDate.toNumber(), status: ['Pending','Paid','Cancelled'][inv.status],
+      isSent: inv.creator.toLowerCase()===userAddress.toLowerCase()
+    });
+  }
+  renderInvoices(allInvoices);
+}
+
+function getCountdown(ts) {
+  const diff=ts-Math.floor(Date.now()/1000);
+  if (diff<=0) return {text:'⚠ Overdue',cls:'countdown-overdue'};
+  const d=Math.floor(diff/86400);
+  if (d===0) return {text:'⚠ Due today',cls:'countdown-warning'};
+  if (d<=3)  return {text:`${d}d left`,  cls:'countdown-warning'};
+  return           {text:`${d} days left`,cls:'countdown-ok'};
+}
+
+function renderInvoices(list) {
+  const c=document.getElementById('invoiceList');
+  if (!list.length) { c.innerHTML='<p style="color:var(--muted);font-size:13px;">No invoices found.</p>'; return; }
+  c.innerHTML=list.map(inv=>{
+    const cd=getCountdown(inv.dueDate);
+    const dueStr=new Date(inv.dueDate*1000).toLocaleDateString();
+    const other=inv.isSent?inv.recipient:inv.creator;
+    const short=other.slice(0,6)+'...'+other.slice(-4);
+    return `<div class="invoice-card">
+      <div class="invoice-top">
+        <div>
+          <div class="inv-id">#${inv.id} · ${inv.isSent?'↑ Sent to':'↓ From'} ${short}</div>
+          <div class="inv-desc">${inv.description}</div>
+          <div class="inv-amount">${inv.amount} USDC</div>
+          ${inv.status==='Pending'?`<span class="inv-countdown ${cd.cls}">${cd.text} · Due ${dueStr}</span>`:''}
+        </div>
+        <span class="status-badge status-${inv.status.toLowerCase()}">${inv.status}</span>
+      </div>
+      <div class="invoice-actions">
+        ${inv.status==='Pending'&&!inv.isSent?`<button class="action-btn btn-pay" onclick="payInvoice(${inv.id})">💳 Pay Now</button>`:''}
+        ${inv.status==='Pending'&&inv.isSent?`<button class="action-btn btn-cancel" onclick="cancelInvoice(${inv.id})">✕ Cancel</button>`:''}
+        <button class="action-btn btn-share" onclick="shareInvoice('${inv.id}','${inv.amount}','${inv.description}')">🔗 Share</button>
+      </div>
+    </div>`;}).join('');
+}
+
+function filterInvoices() {
+  const f=document.getElementById('invoiceFilter').value;
+  let out=allInvoices;
+  if(f==='sent')     out=allInvoices.filter(i=>i.isSent);
+  if(f==='received') out=allInvoices.filter(i=>!i.isSent);
+  if(f==='pending')  out=allInvoices.filter(i=>i.status==='Pending');
+  if(f==='paid')     out=allInvoices.filter(i=>i.status==='Paid');
+  if(f==='cancelled')out=allInvoices.filter(i=>i.status==='Cancelled');
+  renderInvoices(out);
+}
+
+async function payInvoice(id) {
+  try { toast('Sending payment…','info'); const tx=await contract.payInvoice(id); await tx.wait(); toast('✅ Invoice paid!','success'); loadInvoices(); refreshBalance(); }
+  catch(e){ toast('Error: '+(e.reason||e.message),'error'); }
+}
+async function cancelInvoice(id) {
+  try { const tx=await contract.cancelInvoice(id); await tx.wait(); toast('Invoice cancelled','info'); loadInvoices(); }
+  catch(e){ toast('Error: '+(e.reason||e.message),'error'); }
+}
+function shareInvoice(id,amount,desc) {
+  navigator.clipboard.writeText(`ArcPay Invoice #${id}\nAmount: ${amount} USDC\nDescription: ${desc}\nContract: ${CONTRACT_ADDRESS}`);
+  toast('Invoice details copied!','success');
+}
+
+// ══ CLIENTS ══════════════════════════════════════════════════
+function saveClient() {
+  const name=document.getElementById('clientName').value.trim();
+  const addr=document.getElementById('clientAddr').value.trim();
+  const note=document.getElementById('clientNote').value.trim();
+  if (!name||!addr) { toast('Name and address required','error'); return; }
+  if (!/^0x[0-9a-fA-F]{40}$/.test(addr)) { toast('Invalid EVM address','error'); return; }
+  const clients=JSON.parse(localStorage.getItem('arcpay_clients')||'[]');
+  clients.unshift({name,addr,note,id:Date.now()});
+  localStorage.setItem('arcpay_clients',JSON.stringify(clients));
+  document.getElementById('clientName').value='';
+  document.getElementById('clientAddr').value='';
+  document.getElementById('clientNote').value='';
+  document.getElementById('clientAddr').className='';
+  document.getElementById('clientAddrHint').className='field-hint';
+  renderClients(); toast('Client saved!','success');
+}
+function deleteClient(id) {
+  let c=JSON.parse(localStorage.getItem('arcpay_clients')||'[]').filter(x=>x.id!==id);
+  localStorage.setItem('arcpay_clients',JSON.stringify(c));
+  renderClients(); toast('Client removed','info');
+}
+function renderClients() {
+  const clients=JSON.parse(localStorage.getItem('arcpay_clients')||'[]');
+  const container=document.getElementById('clientList');
+  if (!clients.length) { container.innerHTML='<p style="color:var(--muted);font-size:13px;">No clients saved yet.</p>'; return; }
+  container.innerHTML=clients.map(c=>`
+    <div class="client-row">
+      <div><div class="client-name">${c.name}</div><div class="client-addr">${c.addr}</div>${c.note?`<div style="font-size:11px;color:var(--muted);margin-top:2px;">${c.note}</div>`:''}</div>
+      <div style="display:flex;gap:7px;align-items:center;">
+        <button class="action-btn btn-share" style="font-size:11px;padding:4px 9px;" onclick="useClientForInvoice('${c.addr}')">Use</button>
+        <button class="client-del" onclick="deleteClient(${c.id})">🗑</button>
+      </div>
+    </div>`).join('');
+}
+function useClientForInvoice(addr) {
+  document.getElementById('invRecipient').value=addr;
+  validateRecipient(addr);
+  showPage('create', document.querySelectorAll('.nav-item')[1]);
+  toast('Client loaded into invoice form','info');
+}
+
+// ══ PAY LINKS ════════════════════════════════════════════════
+function generatePayLink() {
+  const wallet=document.getElementById('plWallet').value.trim()||userAddress;
+  const amount=document.getElementById('plAmount').value;
+  const note  =document.getElementById('plNote').value.trim();
+  if (!wallet) { toast('Connect wallet first','error'); return; }
+  let link=`https://arcpay.app/pay?to=${wallet}&chain=5039234`;
+  if (amount) link+=`&amount=${amount}`;
+  if (note)   link+=`&note=${encodeURIComponent(note)}`;
+  const box=document.getElementById('plinkResult');
+  box.style.display='block';
+  box.innerHTML=`<div style="margin-bottom:7px;color:var(--muted);font-size:11px;">Your payment link:</div><div style="word-break:break-all;">${link}</div><button class="action-btn btn-share" style="margin-top:9px;font-size:12px;" onclick="navigator.clipboard.writeText('${link}');toast('Link copied!','success')">📋 Copy</button>`;
+  const links=JSON.parse(localStorage.getItem('arcpay_links')||'[]');
+  links.unshift({link,note:note||'Payment link',time:new Date().toISOString()});
+  localStorage.setItem('arcpay_links',JSON.stringify(links.slice(0,20)));
+  renderSavedLinks(); toast('Payment link generated!','success');
+}
+function renderSavedLinks() {
+  const links=JSON.parse(localStorage.getItem('arcpay_links')||'[]');
+  const container=document.getElementById('savedLinks');
+  if (!links.length) { container.innerHTML='<p style="color:var(--muted);font-size:13px;">No saved links yet.</p>'; return; }
+  container.innerHTML=links.map(l=>`
+    <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);">
+      <div><div style="font-size:13px;font-weight:600;">${l.note}</div><div style="font-size:11px;color:var(--muted);">${new Date(l.time).toLocaleDateString()}</div></div>
+      <button class="action-btn btn-share" style="font-size:11px;padding:4px 9px;" onclick="navigator.clipboard.writeText('${l.link}');toast('Copied!','success')">Copy</button>
+    </div>`).join('');
+}
+
+// ══ ANALYTICS ════════════════════════════════════════════════
+async function refreshAnalytics() {
+  if (!contract||!userAddress) return;
+  try {
+    const sent=await contract.getMySentInvoices();
+    const received=await contract.getMyReceivedInvoices();
+    document.getElementById('a-sent').textContent    =sent.length;
+    document.getElementById('a-received').textContent=received.length;
+    let paid=0,pending=0,volume=0;
+    const allIds=[...new Set([...sent.map(i=>i.toString()),...received.map(i=>i.toString())])];
+    for (const id of allIds) {
+      try {
+        const inv=await contract.getInvoice(id);
+        if (inv.creator.toLowerCase()===userAddress.toLowerCase())
+          volume+=parseFloat(ethers.utils.formatUnits(inv.amount,6));
+        if (inv.status===1) paid++;
+        if (inv.status===0) pending++;
+      } catch {}
+    }
+    document.getElementById('a-paid').textContent   =paid;
+    document.getElementById('a-pending').textContent=pending;
+    document.getElementById('a-volume').textContent =volume.toFixed(2)+' USDC';
+  } catch(e){ console.log('Analytics:',e.message); }
+}
+
+// ══ INIT ═════════════════════════════════════════════════════
+renderClients();
+renderSavedLinks();
+</script>
+</body>
+</html>
