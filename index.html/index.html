@@ -1291,8 +1291,42 @@ function filterInvoices() {
 }
 
 async function payInvoice(id) {
-  try { toast('Sending payment…','info'); const tx=await contract.payInvoice(id); await tx.wait(); toast('✅ Invoice paid!','success'); loadInvoices(); refreshBalance(); }
-  catch(e){ toast('Error: '+(e.reason||e.message),'error'); }
+  try {
+    // Step 1: get invoice amount
+    toast('Fetching invoice details…', 'info');
+    const inv = await contract.getInvoice(id);
+    const amount = inv.amount;
+
+    // Step 2: approve USDC spend
+    const USDC_ABI_APPROVE = [
+      "function approve(address spender, uint256 amount) external returns (bool)",
+      "function allowance(address owner, address spender) external view returns (uint256)"
+    ];
+    const usdcWrite = new ethers.Contract(
+      "0x3600000000000000000000000000000000000000",
+      USDC_ABI_APPROVE,
+      signer
+    );
+
+    // Check existing allowance first
+    const allowance = await usdcWrite.allowance(userAddress, CONTRACT_ADDRESS);
+    if (allowance.lt(amount)) {
+      toast('Approving USDC spend…', 'info');
+      const approveTx = await usdcWrite.approve(CONTRACT_ADDRESS, amount);
+      await approveTx.wait();
+      toast('USDC approved — now paying…', 'info');
+    }
+
+    // Step 3: pay invoice
+    toast('Sending payment…', 'info');
+    const tx = await contract.payInvoice(id);
+    await tx.wait();
+    toast('✅ Invoice paid!', 'success');
+    loadInvoices();
+    refreshBalance();
+  } catch (e) {
+    toast('Error: ' + (e.reason || e.message), 'error');
+  }
 }
 async function cancelInvoice(id) {
   try { const tx=await contract.cancelInvoice(id); await tx.wait(); toast('Invoice cancelled','info'); loadInvoices(); }
