@@ -795,7 +795,7 @@
 
 <script>
 // ══ CONFIG ══════════════════════════════════════════════════
-const CONTRACT_ADDRESS = "0xBDF5897181FD10752ABde22b80763227EcB027D5";
+const CONTRACT_ADDRESS = "0xA6eD8d8068553d8e4C17F67CE6B183c950EC1dDA";
 const ARC_CHAIN_ID     = "0x4CEF52"; // 5039234
 const EXPLORER         = "https://explorer.arc.network";
 const RPC_LIST = [
@@ -805,10 +805,10 @@ const RPC_LIST = [
 ];
 
 const CONTRACT_ABI = [
-  "function createInvoice(address,uint256,string,uint256) external returns (uint256)",
-  "function payInvoice(uint256) external",
-  "function cancelInvoice(uint256) external",
-  "function getInvoice(uint256) external view returns (tuple(uint256 id,address creator,address recipient,uint256 amount,string description,uint256 dueDate,uint8 status))",
+  "function createInvoice(address _recipient, uint256 _amount, string memory _description, uint256 _dueDate) external returns (uint256)",
+  "function payInvoice(uint256 _id) external payable",
+  "function cancelInvoice(uint256 _id) external",
+  "function getInvoice(uint256 _id) external view returns (tuple(uint256 id, address creator, address recipient, uint256 amount, string description, uint256 dueDate, uint8 status))",
   "function getMySentInvoices() external view returns (uint256[])",
   "function getMyReceivedInvoices() external view returns (uint256[])"
 ];
@@ -1105,7 +1105,7 @@ async function loadRecentTxns() {
       try {
         const inv  = await contract.getInvoice(id);
         const isSent = inv.creator.toLowerCase() === userAddress.toLowerCase();
-        const amt    = ethers.utils.formatUnits(inv.amount, 6);
+        const amt    = ethers.utils.formatUnits(inv.amount, 18);
         const status = ['Pending','Paid','Cancelled'][inv.status];
         const other  = isSent ? inv.recipient : inv.creator;
         const short  = other.slice(0,6) + '...' + other.slice(-4);
@@ -1182,7 +1182,7 @@ async function createInvoice() {
 
   try {
     btn.disabled=true; btn.textContent='⏳ Creating…'; txResult.style.display='none';
-    const amtUnits    = ethers.utils.parseUnits(amount.toString(), 6);
+    const amtUnits    = ethers.utils.parseEther(amount.toString()); // 18 decimals - Arc native USDC
     const dueDateUnix = Math.floor(new Date(dueDate).getTime()/1000);
     toast('Sending to Arc Network…','info');
     const tx      = await contract.createInvoice(recipient, amtUnits, desc, dueDateUnix);
@@ -1236,7 +1236,7 @@ async function loadInvoices() {
     if (!inv) continue;
     allInvoices.push({
       id: inv.id.toString(), creator: inv.creator, recipient: inv.recipient,
-      amount: ethers.utils.formatUnits(inv.amount,6), description: inv.description,
+      amount: ethers.utils.formatUnits(inv.amount,18), description: inv.description,
       dueDate: inv.dueDate.toNumber(), status: ['Pending','Paid','Cancelled'][inv.status],
       isSent: inv.creator.toLowerCase()===userAddress.toLowerCase()
     });
@@ -1292,48 +1292,23 @@ function filterInvoices() {
 
 async function payInvoice(id) {
   try {
-    // Step 1: get invoice amount
-    toast('Fetching invoice details…', 'info');
-    const inv = await contract.getInvoice(id);
-    const amount = inv.amount;
-
-    // Step 2: approve USDC spend
-    const USDC_ABI_APPROVE = [
-      "function approve(address spender, uint256 amount) external returns (bool)",
-      "function allowance(address owner, address spender) external view returns (uint256)"
-    ];
-    const usdcWrite = new ethers.Contract(
-      "0x3600000000000000000000000000000000000000",
-      USDC_ABI_APPROVE,
-      signer
-    );
-
-    // Check existing allowance first
-    const allowance = await usdcWrite.allowance(userAddress, CONTRACT_ADDRESS);
-    if (allowance.lt(amount)) {
-      toast('Approving USDC spend…', 'info');
-      const approveTx = await usdcWrite.approve(CONTRACT_ADDRESS, amount);
-      await approveTx.wait();
-      toast('USDC approved — now paying…', 'info');
-    }
-
-    // Step 3: pay invoice
+    toast('Fetching invoice…', 'info');
+    const inv    = await contract.getInvoice(id);
+    const amount = ethers.BigNumber.from(inv.amount.toString());
     toast('Sending payment…', 'info');
-    const tx = await contract.payInvoice(id);
+    const tx = await contract.payInvoice(id, { value: amount });
     await tx.wait();
     toast('✅ Invoice paid!', 'success');
     loadInvoices();
     refreshBalance();
-  } catch (e) {
-    toast('Error: ' + (e.reason || e.message), 'error');
-  }
+  } catch(e) { toast('Error: '+(e.reason||e.message), 'error'); }
 }
 async function cancelInvoice(id) {
   try { const tx=await contract.cancelInvoice(id); await tx.wait(); toast('Invoice cancelled','info'); loadInvoices(); }
   catch(e){ toast('Error: '+(e.reason||e.message),'error'); }
 }
 function shareInvoice(id,amount,desc) {
-  navigator.clipboard.writeText(`ArcPay Invoice #${id}\nAmount: ${amount} USDC\nDescription: ${desc}\nContract: ${CONTRACT_ADDRESS}`);
+  navigator.clipboard.writeText(`ArcPay Invoice #${id}\nAmount: ${amount} USDC\nDescription: ${desc}\nPay at: https://arcpayy.vercel.app\nContract: ${CONTRACT_ADDRESS}`);
   toast('Invoice details copied!','success');
 }
 
@@ -1421,7 +1396,7 @@ async function refreshAnalytics() {
       try {
         const inv=await contract.getInvoice(id);
         if (inv.creator.toLowerCase()===userAddress.toLowerCase())
-          volume+=parseFloat(ethers.utils.formatUnits(inv.amount,6));
+          volume+=parseFloat(ethers.utils.formatUnits(inv.amount,18));
         if (inv.status===1) paid++;
         if (inv.status===0) pending++;
       } catch {}
