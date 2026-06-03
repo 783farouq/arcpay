@@ -1360,7 +1360,7 @@ function generatePayLink() {
   const amount=document.getElementById('plAmount').value;
   const note  =document.getElementById('plNote').value.trim();
   if (!wallet) { toast('Connect wallet first','error'); return; }
-  let link=`https://arcpay.app/pay?to=${wallet}&chain=5039234`;
+  let link = `https://arcpayy.vercel.app?to=${wallet}&amount=${amount || ''}&note=${encodeURIComponent(note)}`;
   if (amount) link+=`&amount=${amount}`;
   if (note)   link+=`&note=${encodeURIComponent(note)}`;
   const box=document.getElementById('plinkResult');
