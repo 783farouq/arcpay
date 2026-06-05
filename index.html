@@ -912,30 +912,34 @@
       </div>
     </div>
 
-    // ══ LIVE INVOICE PREVIEW ════════════════════════════════
+  <script>
+// == LIVE INVOICE PREVIEW ==
 document.getElementById('invAmount')?.addEventListener('input', updatePreview);
 document.getElementById('invDesc')?.addEventListener('input', updatePreview);
 document.getElementById('invRecipient')?.addEventListener('input', updatePreview);
 
 function updatePreview() {
-  const amt  = document.getElementById('invAmount').value || '0.00';
-  const desc = document.getElementById('invDesc').value || 'Invoice for services rendered';
-  const addr = document.getElementById('invRecipient').value || '—';
-  const pa = document.getElementById('prev-amount');
-  const pd = document.getElementById('prev-desc');
-  const pr = document.getElementById('prev-addr');
-  const pc = document.getElementById('prev-contract');
-  if (pa) pa.textContent = parseFloat(amt).toFixed(2);
-  if (pd) pd.textContent = desc;
-  if (pr) pr.textContent = addr;
-  if (pc) pc.textContent = CONTRACT_ADDRESS;
+    const amt = document.getElementById('invAmount').value || '0.00';
+    const desc = document.getElementById('invDesc').value || 'Invoice for services rendered';
+    const addr = document.getElementById('invRecipient').value || '-';
+    
+    const pa = document.getElementById('prev-amount');
+    const pd = document.getElementById('prev-desc');
+    const pr = document.getElementById('prev-addr');
+    const pc = document.getElementById('prev-contract');
+    
+    if (pa) pa.textContent = parseFloat(amt).toFixed(2);
+    if (pd) pd.textContent = desc;
+    if (pr) pr.textContent = addr;
+    if (pc) pc.textContent = CONTRACT_ADDRESS;
 }
 
 // Init contract address in preview on load
 setTimeout(() => {
-  const pc = document.getElementById('prev-contract');
-  if (pc) pc.textContent = CONTRACT_ADDRESS;
+    const pc = document.getElementById('prev-contract');
+    if (pc) pc.textContent = CONTRACT_ADDRESS;
 }, 500);
+</script>
     <!-- ══ CREATE INVOICE ══ -->
     <div class="page" id="page-create">
       <div class="page-header">
