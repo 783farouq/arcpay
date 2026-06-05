@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -35,7 +34,7 @@
       --radius:    10px;
       --radius-lg: 14px;
     }
- 
+
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
     html, body { height:100%; overflow:hidden; }
     body {
@@ -47,7 +46,7 @@
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
     }
- 
+
     /* ═══ SIDEBAR ══════════════════════════════════════════════ */
     #sidebar {
       width: var(--sidebar-w);
@@ -60,7 +59,7 @@
       position: relative;
       z-index: 20;
     }
- 
+
     .sb-logo {
       padding: 24px 20px 20px;
       border-bottom: 1px solid var(--border);
@@ -88,21 +87,21 @@
       font-size: 11px; color: var(--muted);
       margin-top: 6px; letter-spacing: .3px;
     }
- 
+
     .sb-nav {
       flex: 1; padding: 14px 12px;
       display: flex; flex-direction: column; gap: 1px;
       overflow-y: auto;
     }
     .sb-nav::-webkit-scrollbar { display: none; }
- 
+
     .sb-section {
       font-size: 10px; font-weight: 700;
       color: var(--muted); text-transform: uppercase;
       letter-spacing: 1.2px;
       padding: 14px 10px 6px;
     }
- 
+
     .nav-item {
       display: flex; align-items: center; gap: 10px;
       padding: 9px 12px; border-radius: 8px;
@@ -139,7 +138,7 @@
       font-size: 10px; font-weight: 700;
       padding: 2px 7px; border-radius: 20px;
     }
- 
+
     /* Wallet panel */
     .sb-wallet {
       padding: 14px 12px 18px;
@@ -191,13 +190,13 @@
     .sw-action-btn:hover { border-color: var(--blue); color: var(--blue); }
     .sw-disc { color: var(--red) !important; }
     .sw-disc:hover { background: rgba(244,63,94,.07) !important; border-color: var(--red) !important; }
- 
+
     /* ═══ MAIN ════════════════════════════════════════════════ */
     #main {
       flex: 1; display: flex; flex-direction: column;
       min-width: 0; height: 100vh; overflow: hidden;
     }
- 
+
     /* Topbar */
     #topbar {
       height: var(--topbar-h); flex-shrink: 0;
@@ -232,7 +231,7 @@
       background: var(--green);
     }
     @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.35;} }
- 
+
     /* Content */
     #content {
       flex: 1; overflow-y: auto; overflow-x: hidden;
@@ -242,12 +241,12 @@
     #content::-webkit-scrollbar { width: 4px; }
     #content::-webkit-scrollbar-track { background: transparent; }
     #content::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
- 
+
     /* ═══ PAGES ═══════════════════════════════════════════════ */
     .page { display: none; }
     .page.active { display: block; animation: fadeIn .2s ease; }
     @keyframes fadeIn { from{opacity:0;transform:translateY(4px);} to{opacity:1;transform:translateY(0);} }
- 
+
     /* ═══ PAGE HEADER ═════════════════════════════════════════ */
     .page-header { margin-bottom: 24px; }
     .page-header h1 {
@@ -256,7 +255,7 @@
       color: var(--text); margin-bottom: 4px; letter-spacing: -.4px;
     }
     .page-header p { font-size: 13px; color: var(--text2); }
- 
+
     /* ═══ CARDS ═══════════════════════════════════════════════ */
     .card {
       background: var(--bg2);
@@ -277,14 +276,14 @@
       color: var(--muted); text-transform: uppercase;
       letter-spacing: 1.2px; margin-bottom: 10px;
     }
- 
+
     /* ═══ DASHBOARD ══════════════════════════════════════════ */
     .db-grid {
       display: grid;
       grid-template-columns: 2fr 1fr 1fr 1fr;
       gap: 14px; margin-bottom: 18px;
     }
- 
+
     .metric-card {
       background: var(--bg2);
       border: 1px solid var(--border);
@@ -301,7 +300,7 @@
     }
     .metric-card:hover { border-color: var(--border3); }
     .metric-card:hover::before { opacity: 1; }
- 
+
     .mc-label {
       font-size: 10.5px; font-weight: 700;
       color: var(--muted); text-transform: uppercase;
@@ -321,7 +320,7 @@
     .mc-badge.green { background: rgba(34,197,94,.1); color: var(--green); }
     .mc-badge.blue  { background: rgba(79,142,247,.1); color: var(--blue); }
     .mc-badge.purple{ background: rgba(168,85,247,.1); color: var(--purple); }
- 
+
     /* Balance hero */
     .balance-hero {
       background: linear-gradient(140deg, #0c1528 0%, #080e1e 60%, #06080f 100%);
@@ -383,12 +382,12 @@
       border: 1px solid var(--border2) !important;
     }
     .bh-btn-secondary:hover { border-color: var(--blue) !important; color: var(--blue); }
- 
+
     /* Dashboard two-col */
     .db-row { display: grid; gap: 14px; margin-bottom: 16px; }
     .db-row.wide { grid-template-columns: 1.7fr 1fr; }
     .db-row.even { grid-template-columns: 1fr 1fr; }
- 
+
     /* Token row */
     .token-row {
       display: flex; align-items: center; gap: 14px;
@@ -408,7 +407,7 @@
     .token-right { text-align: right; margin-left: auto; }
     .token-amount{ font-size: 15px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
     .token-usd   { font-size: 11px; color: var(--text2); margin-top: 2px; }
- 
+
     /* Txn rows */
     .txn-row {
       display: flex; align-items: center; gap: 12px;
@@ -430,7 +429,7 @@
     .txn-right { text-align: right; }
     .txn-amount { font-size: 13px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
     .txn-status { font-size: 11px; color: var(--text2); margin-top: 1px; }
- 
+
     /* ═══ FORMS ═══════════════════════════════════════════════ */
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .form-group { margin-bottom: 15px; }
@@ -472,7 +471,7 @@
     .submit-btn:hover { opacity:.88; transform:translateY(-1px); box-shadow:0 4px 16px rgba(79,142,247,.25); }
     .submit-btn:disabled { opacity:.4; cursor:not-allowed; transform:none; box-shadow:none; }
     .submit-btn.full { width:100%; justify-content:center; }
- 
+
     /* ═══ INVOICE CARDS ═══════════════════════════════════════ */
     .filter-bar {
       display: flex; align-items: center; gap: 8px;
@@ -491,7 +490,7 @@
       font-family: 'Inter', sans-serif; transition: all .15s;
     }
     .refresh-btn:hover { border-color: var(--blue); color: var(--blue); }
- 
+
     .invoice-card {
       background: var(--bg2); border: 1px solid var(--border);
       border-radius: var(--radius); padding: 18px;
@@ -529,7 +528,7 @@
     .btn-cancel { background: rgba(244,63,94,.08); color: var(--red); border: 1px solid rgba(244,63,94,.2); }
     .btn-share  { background: var(--bg4); color: var(--text2); border: 1px solid var(--border2); }
     .btn-share:hover { color: var(--blue); border-color: rgba(79,142,247,.4); }
- 
+
     /* ═══ CLIENTS ═════════════════════════════════════════════ */
     .client-row {
       display: flex; align-items: center; justify-content: space-between;
@@ -548,7 +547,7 @@
     .client-addr  { font-size: 10.5px; color: var(--text2); margin-top: 2px; font-family: 'JetBrains Mono', monospace; }
     .client-del   { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; transition: color .15s; }
     .client-del:hover { color: var(--red); }
- 
+
     /* ═══ PAY LINKS ═══════════════════════════════════════════ */
     .plink-box {
       background: var(--bg4); border: 1px solid var(--border3);
@@ -558,7 +557,7 @@
       margin-top: 14px; display: none;
       line-height: 1.6;
     }
- 
+
     /* ═══ ANALYTICS ═══════════════════════════════════════════ */
     .analytics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 16px; }
     .analytic-card {
@@ -570,7 +569,7 @@
     .a-icon { font-size: 22px; margin-bottom: 10px; }
     .a-value { font-family: 'Syne', sans-serif; font-size: 30px; font-weight: 800; color: var(--text); line-height: 1; }
     .a-label { font-size: 11px; color: var(--text2); margin-top: 6px; font-weight: 500; }
- 
+
     /* ═══ TX LINK ═════════════════════════════════════════════ */
     .tx-link {
       color: var(--blue); font-size: 12px; text-decoration: none;
@@ -578,7 +577,7 @@
       font-family: 'JetBrains Mono', monospace;
     }
     .tx-link:hover { text-decoration: underline; }
- 
+
     /* ═══ TOAST ═══════════════════════════════════════════════ */
     #toast-container {
       position: fixed; bottom: 24px; right: 24px;
@@ -595,7 +594,7 @@
     .toast-error   { background: rgba(244,63,94,.08); color: #fb7185; border: 1px solid rgba(244,63,94,.2); }
     .toast-info    { background: rgba(79,142,247,.08); color: var(--blue); border: 1px solid rgba(79,142,247,.2); }
     @keyframes toastIn { from{transform:translateY(16px);opacity:0;} to{transform:translateY(0);opacity:1;} }
- 
+
     /* ═══ WALLET MODAL ════════════════════════════════════════ */
     #walletModal {
       display: none; position: fixed; inset: 0;
@@ -616,7 +615,7 @@
     .modal-sub { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
     .modal-section { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin: 14px 0 8px; font-weight: 700; }
     .modal-footer { font-size: 11px; color: var(--muted); text-align: center; margin-top: 16px; }
- 
+
     .wallet-option {
       display: flex; align-items: center; gap: 12px;
       padding: 12px 14px; border-radius: 10px;
@@ -639,19 +638,19 @@
     .tag-recent    { color: var(--blue); }
     .tag-installed { color: var(--green); }
     .tag-soon      { color: var(--muted); opacity: .6; }
- 
+
     /* ═══ NOT CONNECTED ═══════════════════════════════════════ */
     .not-connected { text-align: center; padding: 80px 20px; color: var(--muted); }
     .not-connected .nc-icon { font-size: 48px; margin-bottom: 16px; opacity: .5; }
     .not-connected p { font-size: 15px; margin-bottom: 22px; color: var(--text2); }
- 
+
     /* ═══ DIVIDER ═════════════════════════════════════════════ */
     .divider {
       height: 1px;
       background: linear-gradient(90deg, transparent, var(--border2), transparent);
       margin: 20px 0;
     }
- 
+
     /* ═══ PREVIEW CARD ════════════════════════════════════════ */
     .preview-card {
       background: var(--bg3); border: 1px solid var(--border2);
@@ -667,7 +666,7 @@
       color: var(--text); margin-bottom: 4px;
     }
     .preview-card .pc-amount span { color: var(--blue); }
- 
+
     /* ═══ STAT STRIP ══════════════════════════════════════════ */
     .stat-strip {
       display: flex; gap: 12px; margin-top: 12px;
@@ -683,9 +682,9 @@
   </style>
 </head>
 <body>
- 
+
 <div id="toast-container"></div>
- 
+
 <!-- ══ WALLET MODAL ═══════════════════════════════════════════ -->
 <div id="walletModal">
   <div class="modal-box">
@@ -694,13 +693,13 @@
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <p class="modal-sub">Connect to Arc Network Testnet to continue</p>
- 
+
     <div id="recentSection" style="display:none;">
       <div class="modal-section">Recently Used</div>
       <div id="recentWallets"></div>
       <div class="modal-section">All Wallets</div>
     </div>
- 
+
     <div class="wallet-option" onclick="connectWithWallet('metamask')">
       <div class="w-icon" style="background:#e8761a;">
         <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" onerror="this.outerHTML='🦊'"/>
@@ -708,35 +707,35 @@
       <div class="w-info"><div class="w-name">MetaMask</div><div class="w-desc">Most popular EVM wallet</div></div>
       <span class="w-tag" id="mm-tag"></span>
     </div>
- 
+
     <div class="wallet-option" onclick="connectWithWallet('rabby')">
       <div class="w-icon" style="background:#7B3FE4;font-size:20px;">🐰</div>
       <div class="w-info"><div class="w-name">Rabby Wallet</div><div class="w-desc">Smart security wallet</div></div>
       <span class="w-tag" id="rabby-tag"></span>
     </div>
- 
+
     <div class="wallet-option" onclick="connectWithWallet('okx')">
       <div class="w-icon" style="background:#000;border:1px solid #333;color:#fff;font-weight:800;font-size:12px;font-family:'DM Mono',monospace;">OK</div>
       <div class="w-info"><div class="w-name">OKX Wallet</div><div class="w-desc">Multi-chain Web3 wallet</div></div>
       <span class="w-tag" id="okx-tag"></span>
     </div>
- 
+
     <div class="wallet-option" onclick="toast('Coming soon!','info')">
       <div class="w-icon" style="background:#3B99FC;font-size:18px;">🔗</div>
       <div class="w-info"><div class="w-name">WalletConnect</div><div class="w-desc">Mobile & hardware wallets</div></div>
       <span class="w-tag tag-soon">Coming Soon</span>
     </div>
- 
+
     <div class="wallet-option" onclick="toast('Coming soon!','info')">
       <div class="w-icon" style="background:#0052FF;font-size:18px;">🔵</div>
       <div class="w-info"><div class="w-name">Coinbase Wallet</div><div class="w-desc">Easy onboarding</div></div>
       <span class="w-tag tag-soon">Coming Soon</span>
     </div>
- 
+
     <p class="modal-footer">By connecting you agree to use ArcPay on Arc Network Testnet</p>
   </div>
 </div>
- 
+
 <!-- ══ SIDEBAR ════════════════════════════════════════════════ -->
 <div id="sidebar">
   <div class="sb-logo">
@@ -746,10 +745,10 @@
     </div>
     <div class="sb-tagline">On-chain invoice platform</div>
   </div>
- 
+
   <nav class="sb-nav">
     <div class="sb-section">Main</div>
- 
+
     <div class="nav-item active" onclick="showPage('dashboard',this)">
       <div class="ni-icon">⬡</div> Dashboard
     </div>
@@ -759,9 +758,9 @@
     <div class="nav-item" onclick="showPage('invoices',this)">
       <div class="ni-icon">≡</div> My Invoices
     </div>
- 
+
     <div class="sb-section" style="margin-top:8px;">Tools</div>
- 
+
     <div class="nav-item" onclick="showPage('clients',this)">
       <div class="ni-icon">◎</div> Clients
     </div>
@@ -772,7 +771,7 @@
       <div class="ni-icon">↗</div> Analytics
     </div>
   </nav>
- 
+
   <!-- Wallet panel -->
   <div class="sb-wallet">
     <div id="sw-disconnected">
@@ -793,10 +792,10 @@
     </div>
   </div>
 </div>
- 
+
 <!-- ══ MAIN ═══════════════════════════════════════════════════ -->
 <div id="main">
- 
+
   <!-- Topbar -->
   <div id="topbar">
     <div class="topbar-title" id="topbarTitle">Dashboard</div>
@@ -805,13 +804,13 @@
     </div>
     <div class="topbar-chip chip-addr" id="topbarAddr"></div>
   </div>
- 
+
   <!-- Content -->
   <div id="content">
- 
+
     <!-- ══ DASHBOARD ══ -->
     <div class="page active" id="page-dashboard">
- 
+
       <div id="not-connected-msg">
         <div class="not-connected">
           <div class="nc-icon">⬡</div>
@@ -819,9 +818,9 @@
           <button class="submit-btn" onclick="openModal()">Connect Wallet</button>
         </div>
       </div>
- 
+
       <div id="dashboard-content" style="display:none;">
- 
+
         <!-- Metrics row -->
         <div class="db-grid">
           <!-- Balance hero -->
@@ -839,20 +838,20 @@
               <button class="bh-btn bh-btn-secondary" onclick="copyAddress()">📋 Copy Address</button>
             </div>
           </div>
- 
+
           <div class="metric-card">
             <div class="mc-label">Invoices Sent</div>
             <div class="mc-value" id="sentCount">0</div>
             <div class="mc-sub">Total created on-chain</div>
             <div class="mc-badge blue">↑ On Arc Testnet</div>
           </div>
- 
+
           <div class="metric-card">
             <div class="mc-label">Invoices Received</div>
             <div class="mc-value" id="receivedCount">0</div>
             <div class="mc-sub">Awaiting your payment</div>
           </div>
- 
+
           <div class="metric-card">
             <div class="mc-label">Settlement Speed</div>
             <div class="mc-value">&lt;1s</div>
@@ -860,7 +859,7 @@
             <div class="mc-badge green">● Live</div>
           </div>
         </div>
- 
+
         <!-- Two columns -->
         <div class="db-row wide">
           <!-- Recent transactions -->
@@ -873,7 +872,7 @@
               <p style="color:var(--muted);font-size:13px;text-align:center;padding:24px 0;">No transactions yet</p>
             </div>
           </div>
- 
+
           <!-- Right column -->
           <div style="display:flex;flex-direction:column;gap:16px;">
             <!-- Token balance card -->
@@ -891,7 +890,7 @@
                 </div>
               </div>
             </div>
- 
+
             <!-- Network card -->
             <div class="card">
               <div class="card-label">Network</div>
@@ -908,55 +907,27 @@
             </div>
           </div>
         </div>
- 
+
       </div>
     </div>
 
-  <script>
-// == LIVE INVOICE PREVIEW ==
-document.getElementById('invAmount')?.addEventListener('input', updatePreview);
-document.getElementById('invDesc')?.addEventListener('input', updatePreview);
-document.getElementById('invRecipient')?.addEventListener('input', updatePreview);
-
-function updatePreview() {
-    const amt = document.getElementById('invAmount').value || '0.00';
-    const desc = document.getElementById('invDesc').value || 'Invoice for services rendered';
-    const addr = document.getElementById('invRecipient').value || '-';
-    
-    const pa = document.getElementById('prev-amount');
-    const pd = document.getElementById('prev-desc');
-    const pr = document.getElementById('prev-addr');
-    const pc = document.getElementById('prev-contract');
-    
-    if (pa) pa.textContent = parseFloat(amt).toFixed(2);
-    if (pd) pd.textContent = desc;
-    if (pr) pr.textContent = addr;
-    if (pc) pc.textContent = CONTRACT_ADDRESS;
-}
-
-// Init contract address in preview on load
-setTimeout(() => {
-    const pc = document.getElementById('prev-contract');
-    if (pc) pc.textContent = CONTRACT_ADDRESS;
-}, 500);
-</script>
     <!-- ══ CREATE INVOICE ══ -->
     <div class="page" id="page-create">
       <div class="page-header">
         <h1>Create Invoice</h1>
         <p>Send an on-chain invoice to any EVM wallet address</p>
       </div>
- 
+
       <div style="display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:start;">
         <div class="card">
           <div class="card-title">Invoice Details</div>
- 
+
           <div class="form-group">
             <label>Recipient Wallet Address</label>
             <input type="text" id="invRecipient" placeholder="0x... (EVM addresses only)" oninput="validateRecipient(this.value)"/>
             <div class="field-hint" id="recipientHint"></div>
           </div>
- 
+
           <div class="form-row">
             <div class="form-group">
               <label>Amount (USDC)</label>
@@ -964,30 +935,41 @@ setTimeout(() => {
             </div>
             <div class="form-group">
               <label>Due Date</label>
-             <input type="date" id="invDueDate" style="color-scheme:dark;"/>
+              <input type="date" id="invDueDate"/>
             </div>
           </div>
- 
+
           <div class="form-group">
             <label>Description</label>
             <textarea id="invDesc" rows="3" placeholder="What is this invoice for?"></textarea>
           </div>
- 
+
           <button class="submit-btn full" id="createBtn" onclick="createInvoice()">
             🚀 Create Invoice on Arc
           </button>
           <div id="txResult" style="display:none;margin-top:12px;"></div>
         </div>
- 
+
         <!-- Preview card -->
- <div class="pc-label">ArcPay · Arc Testnet</div>
-<div class="pc-amount"><span id="prev-amount">0.00</span> <span style="color:var(--blue);">USDC</span></div>
-<div style="font-size:12px;color:var(--text2);margin-bottom:16px;" id="prev-desc">Invoice for services rendered</div>
-<div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Recipient</div>
-<div style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text2);word-break:break-all;margin-bottom:12px;" id="prev-addr">—</div>
-<div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Contract</div>
-<div style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text2);word-break:break-all;" id="prev-contract">—</div>
- 
+        <div class="card" style="position:sticky;top:0;">
+          <div class="card-title">Invoice Preview</div>
+          <div style="padding:16px;background:var(--bg3);border-radius:9px;border:1px solid var(--border2);">
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">ArcPay · Arc Testnet</div>
+            <div style="font-size:28px;font-weight:800;font-family:'Syne',sans-serif;color:var(--text);margin-bottom:4px;">0.00 <span style="color:var(--blue);">USDC</span></div>
+            <div style="font-size:12px;color:var(--text2);margin-bottom:16px;">Invoice for services rendered</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Contract</div>
+            <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text2);word-break:break-all;">${CONTRACT_ADDRESS}</div>
+          </div>
+          <div style="margin-top:14px;font-size:12px;color:var(--text2);line-height:1.7;">
+            ✓ Immutable record on Arc Network<br/>
+            ✓ Instant USDC settlement<br/>
+            ✓ No bank, no middleman<br/>
+            ✓ Recipient pays in one click
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ══ MY INVOICES ══ -->
     <div class="page" id="page-invoices">
       <div class="page-header">
@@ -1011,7 +993,7 @@ setTimeout(() => {
         </div>
       </div>
     </div>
- 
+
     <!-- ══ CLIENTS ══ -->
     <div class="page" id="page-clients">
       <div class="page-header">
@@ -1042,7 +1024,7 @@ setTimeout(() => {
         </div>
       </div>
     </div>
- 
+
     <!-- ══ PAY LINKS ══ -->
     <div class="page" id="page-paylinks">
       <div class="page-header">
@@ -1075,7 +1057,7 @@ setTimeout(() => {
         </div>
       </div>
     </div>
- 
+
     <!-- ══ ANALYTICS ══ -->
     <div class="page" id="page-analytics">
       <div class="page-header">
@@ -1091,7 +1073,7 @@ setTimeout(() => {
         <div class="analytic-card"><div class="a-value" style="color:var(--green);">&lt;1s</div><div class="a-label">Avg Settlement Time</div></div>
       </div>
       <button class="submit-btn" onclick="refreshAnalytics()">🔄 Refresh Analytics</button>
- 
+
       <div class="card" style="margin-top:20px;">
         <div class="card-title">About ArcPay</div>
         <p style="color:var(--text2);font-size:13px;line-height:1.9;">
@@ -1107,10 +1089,10 @@ setTimeout(() => {
         </div>
       </div>
     </div>
- 
+
   </div><!-- /content -->
 </div><!-- /main -->
- 
+
 <script>
 // ══ CONFIG ═══════════════════════════════════════════════════
 const CONTRACT_ADDRESS = "0xA6eD8d8068553d8e4C17F67CE6B183c950EC1dDA";
@@ -1129,11 +1111,11 @@ const CONTRACT_ABI = [
   "function getMySentInvoices() external view returns (uint256[])",
   "function getMyReceivedInvoices() external view returns (uint256[])"
 ];
- 
+
 // ══ STATE ════════════════════════════════════════════════════
 let provider, signer, contract, userAddress;
 let allInvoices = [], connected = false, balanceInterval = null;
- 
+
 // ══ TOAST ════════════════════════════════════════════════════
 function toast(msg, type = 'info') {
   const el = document.createElement('div');
@@ -1142,14 +1124,14 @@ function toast(msg, type = 'info') {
   document.getElementById('toast-container').appendChild(el);
   setTimeout(() => el.remove(), 4500);
 }
- 
+
 // ══ NAV ══════════════════════════════════════════════════════
 const PAGE_TITLES = {
   dashboard:'Dashboard', create:'Create Invoice',
   invoices:'My Invoices', clients:'Clients',
   paylinks:'Pay Links', analytics:'Analytics'
 };
- 
+
 function showPage(name, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
@@ -1160,14 +1142,14 @@ function showPage(name, el) {
   if (name === 'analytics' && userAddress) refreshAnalytics();
   if (name === 'dashboard' && userAddress) { refreshBalance(); loadRecentTxns(); }
 }
- 
+
 // ══ MODAL ════════════════════════════════════════════════════
 function openModal() {
   const has     = !!window.ethereum;
   const isMM    = has && !!window.ethereum.isMetaMask && !window.ethereum.isRabby;
   const isRabby = has && !!window.ethereum.isRabby;
   const isOKX   = !!window.okxwallet;
- 
+
   const setTag = (id, on) => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -1175,7 +1157,7 @@ function openModal() {
     else    { el.textContent='';            el.className='w-tag'; }
   };
   setTag('mm-tag',isMM); setTag('rabby-tag',isRabby); setTag('okx-tag',isOKX);
- 
+
   const recent = localStorage.getItem('arcpay_last_wallet');
   const rsec   = document.getElementById('recentSection');
   if (recent) {
@@ -1188,21 +1170,21 @@ function openModal() {
         <span class="w-tag tag-recent">Recently Used</span>
       </div>`;
   } else rsec.style.display = 'none';
- 
+
   document.getElementById('walletModal').classList.add('open');
 }
- 
+
 function closeModal() { document.getElementById('walletModal').classList.remove('open'); }
 document.addEventListener('click', e => {
   if (e.target === document.getElementById('walletModal')) closeModal();
 });
- 
+
 // ══ CONNECT ══════════════════════════════════════════════════
 async function connectWithWallet(type) {
   const eth = (type==='okx') ? (window.okxwallet||window.ethereum) : window.ethereum;
   if (!eth) { toast('Wallet not found — please install it first','error'); return; }
   closeModal();
- 
+
   try {
     await eth.request({ method:'eth_requestAccounts' });
     try {
@@ -1216,17 +1198,17 @@ async function connectWithWallet(type) {
         }]});
       } else throw e;
     }
- 
+
     provider    = new ethers.providers.Web3Provider(eth);
     signer      = provider.getSigner();
     userAddress = await signer.getAddress();
     contract    = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
     connected   = true;
     localStorage.setItem('arcpay_last_wallet', type);
- 
+
     const network = await provider.getNetwork();
     const short   = userAddress.slice(0,6)+'...'+userAddress.slice(-4);
- 
+
     document.getElementById('sw-disconnected').style.display  = 'none';
     document.getElementById('sw-connected').style.display     = 'flex';
     document.getElementById('sw-connected').style.flexDirection = 'column';
@@ -1242,28 +1224,28 @@ async function connectWithWallet(type) {
     document.getElementById('walletAddr').textContent = userAddress;
     const plw = document.getElementById('plWallet');
     if (plw) plw.value = userAddress;
- 
+
     setupWalletListeners(eth);
     await refreshBalance();
     await loadInvoiceCounts();
     loadRecentTxns();
- 
+
     if (balanceInterval) clearInterval(balanceInterval);
     balanceInterval = setInterval(refreshBalance, 30000);
     toast('Wallet connected!','success');
- 
+
   } catch(err) {
     if (err.code===4001) toast('Connection rejected','error');
     else toast('Connection failed: '+(err.message||err),'error');
   }
 }
- 
+
 // ══ DISCONNECT ═══════════════════════════════════════════════
 function disconnectWallet() {
   if (balanceInterval) clearInterval(balanceInterval);
   connected=false; userAddress=null;
   provider=signer=contract=null; allInvoices=[];
- 
+
   document.getElementById('sw-disconnected').style.display = 'block';
   document.getElementById('sw-connected').style.display    = 'none';
   document.getElementById('topbarAddr').style.display      = 'none';
@@ -1277,13 +1259,13 @@ function disconnectWallet() {
   if (rt) rt.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:24px 0;">No transactions yet</p>';
   toast('Wallet disconnected','info');
 }
- 
+
 function copyAddress() {
   if (!userAddress) return;
   navigator.clipboard.writeText(userAddress);
   toast('Address copied!','success');
 }
- 
+
 // ══ WALLET EVENTS ════════════════════════════════════════════
 function setupWalletListeners(eth) {
   if (!eth||!eth.on) return;
@@ -1302,7 +1284,7 @@ function setupWalletListeners(eth) {
 }
 if (window.ethereum)  setupWalletListeners(window.ethereum);
 if (window.okxwallet) setupWalletListeners(window.okxwallet);
- 
+
 // ══ BALANCE ══════════════════════════════════════════════════
 async function refreshBalance() {
   if (!userAddress) return;
@@ -1319,7 +1301,7 @@ async function refreshBalance() {
   const bf=document.getElementById('bh-fiat'); if(bf) bf.textContent='≈ '+usdVal+' USD';
   const tu=document.getElementById('tokenUsd'); if(tu) tu.textContent=usdVal;
 }
- 
+
 // ══ RECENT TXNs ══════════════════════════════════════════════
 async function loadRecentTxns() {
   const container=document.getElementById('recentTxns');
@@ -1357,7 +1339,7 @@ async function loadRecentTxns() {
     container.innerHTML=rows.length?rows.join(''):'<p style="color:var(--muted);font-size:13px;text-align:center;padding:24px 0;">No transactions yet</p>';
   } catch { container.innerHTML='<p style="color:var(--muted);font-size:13px;text-align:center;padding:16px 0;">Could not load transactions</p>'; }
 }
- 
+
 // ══ INVOICE COUNTS ═══════════════════════════════════════════
 async function loadInvoiceCounts() {
   if (!contract) return;
@@ -1368,7 +1350,7 @@ async function loadInvoiceCounts() {
     document.getElementById('receivedCount').textContent=r.length;
   } catch {}
 }
- 
+
 // ══ VALIDATE EVM ═════════════════════════════════════════════
 function validateRecipient(val){ return _evm(val,document.getElementById('invRecipient'),document.getElementById('recipientHint')); }
 function validateClientAddr(val){ return _evm(val,document.getElementById('clientAddr'),document.getElementById('clientAddrHint')); }
@@ -1382,7 +1364,7 @@ function _evm(val,input,hint) {
   input.className='input-error'; hint.className='field-hint hint-error';
   hint.textContent=`❌ ${net} address detected — ArcPay requires an EVM address (0x...)`; return false;
 }
- 
+
 // ══ CREATE INVOICE ════════════════════════════════════════════
 async function createInvoice() {
   if (!contract) { toast('Connect your wallet first','error'); return; }
@@ -1415,7 +1397,7 @@ async function createInvoice() {
   } catch(err) { toast('Error: '+(err.reason||err.message),'error'); }
   finally { btn.disabled=false; btn.textContent='🚀 Create Invoice on Arc'; }
 }
- 
+
 // ══ LOAD INVOICES ════════════════════════════════════════════
 async function loadInvoices() {
   if (!contract) return;
@@ -1436,7 +1418,7 @@ async function loadInvoices() {
   }
   renderInvoices(allInvoices);
 }
- 
+
 function getCountdown(ts){
   const diff=ts-Math.floor(Date.now()/1000);
   if(diff<=0)return{text:'⚠ Overdue',cls:'countdown-overdue'};
@@ -1445,7 +1427,7 @@ function getCountdown(ts){
   if(d<=3)return{text:`${d}d left`,cls:'countdown-warning'};
   return{text:`${d} days left`,cls:'countdown-ok'};
 }
- 
+
 function renderInvoices(list){
   const c=document.getElementById('invoiceList');
   if(!list.length){c.innerHTML='<p style="color:var(--muted);font-size:13px;text-align:center;padding:32px 0;">No invoices found.</p>';return;}
@@ -1471,7 +1453,7 @@ function renderInvoices(list){
       </div>
     </div>`;}).join('');
 }
- 
+
 function filterInvoices(){
   const f=document.getElementById('invoiceFilter').value;
   let out=allInvoices;
@@ -1482,7 +1464,7 @@ function filterInvoices(){
   if(f==='cancelled')out=allInvoices.filter(i=>i.status==='Cancelled');
   renderInvoices(out);
 }
- 
+
 async function payInvoice(id){
   try{
     toast('Fetching invoice…','info');
@@ -1495,17 +1477,17 @@ async function payInvoice(id){
     loadInvoices(); refreshBalance();
   }catch(e){toast('Error: '+(e.reason||e.message),'error');}
 }
- 
+
 async function cancelInvoice(id){
   try{const tx=await contract.cancelInvoice(id);await tx.wait();toast('Invoice cancelled','info');loadInvoices();}
   catch(e){toast('Error: '+(e.reason||e.message),'error');}
 }
- 
+
 function shareInvoice(id,amount,desc){
   navigator.clipboard.writeText(`ArcPay Invoice #${id}\nAmount: ${amount} USDC\nDescription: ${desc}\nPay at: https://arcpayy.vercel.app\nContract: ${CONTRACT_ADDRESS}`);
   toast('Invoice details copied!','success');
 }
- 
+
 // ══ CLIENTS ══════════════════════════════════════════════════
 function saveClient(){
   const name=document.getElementById('clientName').value.trim();
@@ -1547,7 +1529,7 @@ function useClientForInvoice(addr){
   showPage('create',document.querySelectorAll('.nav-item')[1]);
   toast('Client loaded into invoice form','info');
 }
- 
+
 // ══ PAY LINKS ════════════════════════════════════════════════
 function generatePayLink(){
   const wallet=document.getElementById('plWallet').value.trim()||userAddress;
@@ -1575,7 +1557,7 @@ function renderSavedLinks(){
       <button class="action-btn btn-share" style="font-size:11px;padding:5px 10px;" onclick="navigator.clipboard.writeText('${l.link}');toast('Copied!','success')">Copy</button>
     </div>`).join('');
 }
- 
+
 // ══ ANALYTICS ════════════════════════════════════════════════
 async function refreshAnalytics(){
   if(!contract||!userAddress) return;
@@ -1600,7 +1582,7 @@ async function refreshAnalytics(){
     document.getElementById('a-volume').textContent=volume.toFixed(4)+' USDC';
   }catch(e){console.log('Analytics:',e.message);}
 }
- 
+
 // ══ INIT ═════════════════════════════════════════════════════
 renderClients();
 renderSavedLinks();
